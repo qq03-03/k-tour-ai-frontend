@@ -13,7 +13,7 @@ export default function ResultCard({ segment }) {
       style={{ background: '#fff', borderRadius: 18, boxShadow: '0 4px 14px rgba(15,23,42,.06)', display: 'flex', overflow: 'hidden' }}
     >
       <img
-        src={segment.keyframe_path}
+        src={`${import.meta.env.BASE_URL}${segment.keyframe_path}`}
         alt={segment.spot_name}
         style={{ width: 96, height: 96, objectFit: 'cover', flexShrink: 0 }}
       />

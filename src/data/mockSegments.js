@@ -1,5 +1,7 @@
 // Copied from embedding-db/metadata/metadata.json (10 real segments, all "summer").
-// keyframe_path is rewritten to the /keyframes/ path served from public/.
+// keyframe_path is relative to public/ (e.g. 'keyframes/SEG_...jpg') -- components
+// prepend import.meta.env.BASE_URL when rendering so it resolves correctly under
+// the GitHub Pages base path (see ResultCard.jsx / Detail.jsx).
 export const mockSegments = [
   {
     place_name: 'nami_island',
@@ -14,7 +16,7 @@ export const mockSegments = [
     spot_name: '숲속 정자와 메타세쿼이아길',
     start_time: 0.0,
     end_time: 4.63,
-    keyframe_path: '/keyframes/SEG_NAMI_01_01.jpg',
+    keyframe_path: 'keyframes/SEG_NAMI_01_01.jpg',
   },
   {
     place_name: 'nami_island',
@@ -29,7 +31,7 @@ export const mockSegments = [
     spot_name: '수국 정원과 숲속 피크닉',
     start_time: 4.63,
     end_time: 9.97,
-    keyframe_path: '/keyframes/SEG_NAMI_01_02.jpg',
+    keyframe_path: 'keyframes/SEG_NAMI_01_02.jpg',
   },
   {
     place_name: 'nami_island',
@@ -44,7 +46,7 @@ export const mockSegments = [
     spot_name: '디저트와 토끼 체험',
     start_time: 9.97,
     end_time: 15.33,
-    keyframe_path: '/keyframes/SEG_NAMI_01_03.jpg',
+    keyframe_path: 'keyframes/SEG_NAMI_01_03.jpg',
   },
   {
     place_name: 'nami_island',
@@ -59,7 +61,7 @@ export const mockSegments = [
     spot_name: '야외 수영장과 등불 산책길',
     start_time: 15.33,
     end_time: 22.5,
-    keyframe_path: '/keyframes/SEG_NAMI_01_04.jpg',
+    keyframe_path: 'keyframes/SEG_NAMI_01_04.jpg',
   },
   {
     place_name: 'nami_island',
@@ -74,7 +76,7 @@ export const mockSegments = [
     spot_name: '숲속 벤치와 연못 정자',
     start_time: 0.0,
     end_time: 8.13,
-    keyframe_path: '/keyframes/SEG_NAMI_02_01.jpg',
+    keyframe_path: 'keyframes/SEG_NAMI_02_01.jpg',
   },
   {
     place_name: 'nami_island',
@@ -89,7 +91,7 @@ export const mockSegments = [
     spot_name: '연꽃 정원과 오리',
     start_time: 8.13,
     end_time: 17.33,
-    keyframe_path: '/keyframes/SEG_NAMI_02_02.jpg',
+    keyframe_path: 'keyframes/SEG_NAMI_02_02.jpg',
   },
   {
     place_name: 'nami_island',
@@ -104,7 +106,7 @@ export const mockSegments = [
     spot_name: '전통 건축물과 수국길',
     start_time: 17.33,
     end_time: 26.13,
-    keyframe_path: '/keyframes/SEG_NAMI_02_03.jpg',
+    keyframe_path: 'keyframes/SEG_NAMI_02_03.jpg',
   },
   {
     place_name: 'nami_island',
@@ -119,7 +121,7 @@ export const mockSegments = [
     spot_name: '숲속 잔디밭의 오리 무리',
     start_time: 0.0,
     end_time: 15.27,
-    keyframe_path: '/keyframes/SEG_NAMI_03_01.jpg',
+    keyframe_path: 'keyframes/SEG_NAMI_03_01.jpg',
   },
   {
     place_name: 'nami_island',
@@ -134,7 +136,7 @@ export const mockSegments = [
     spot_name: '연꽃 정원과 연못의 오리',
     start_time: 15.27,
     end_time: 28.83,
-    keyframe_path: '/keyframes/SEG_NAMI_03_02.jpg',
+    keyframe_path: 'keyframes/SEG_NAMI_03_02.jpg',
   },
   {
     place_name: 'nami_island',
@@ -149,6 +151,6 @@ export const mockSegments = [
     spot_name: '숲속 잔디밭으로 돌아온 오리',
     start_time: 28.83,
     end_time: 34.6,
-    keyframe_path: '/keyframes/SEG_NAMI_03_03.jpg',
+    keyframe_path: 'keyframes/SEG_NAMI_03_03.jpg',
   },
 ]

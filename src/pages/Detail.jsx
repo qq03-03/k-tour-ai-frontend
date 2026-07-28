@@ -27,7 +27,7 @@ export default function Detail() {
     <div>
       <Header />
       <div style={{ position: 'relative', height: 200, background: 'linear-gradient(135deg,#c7d2fe,#a5f3fc)' }}>
-        <img src={segment.keyframe_path} alt={segment.spot_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <img src={`${import.meta.env.BASE_URL}${segment.keyframe_path}`} alt={segment.spot_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       </div>
       <div style={{ padding: '20px 24px' }}>
         <h2 style={{ margin: 0, fontSize: 19 }}>{segment.spot_name}</h2>

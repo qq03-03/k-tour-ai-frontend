@@ -24,9 +24,9 @@ describe('mockSegments', () => {
     }
   })
 
-  it('every keyframe_path points under /keyframes/', () => {
+  it('every keyframe_path is a public/-relative path under keyframes/', () => {
     for (const segment of mockSegments) {
-      expect(segment.keyframe_path.startsWith('/keyframes/')).toBe(true)
+      expect(segment.keyframe_path.startsWith('keyframes/')).toBe(true)
     }
   })
 })
