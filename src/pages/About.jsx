@@ -15,7 +15,7 @@ const searchPipelineSteps = [
   { icon: '⌨️', label: '검색', status: 'pending', statusLabel: '🔲 UI 구현 중' },
   { icon: '🧠', label: 'Query Analysis', status: 'pending', statusLabel: '🔲 확인 필요' },
   { icon: '🔎', label: 'Vector Search', status: 'done', statusLabel: '✅ 완료' },
-  { icon: '🔀', label: 'RRF', status: 'pending', statusLabel: '🔲 확인 필요' },
+  { icon: '🔀', label: 'RRF', status: 'done', statusLabel: '✅ 완료' },
   { icon: '✨', label: '추천 결과', status: 'pending', statusLabel: '🔲 UI 구현 중' },
 ]
 

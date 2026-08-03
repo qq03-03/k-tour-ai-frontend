@@ -1,6 +1,7 @@
 function buildSearchText(segment) {
   return [
-    segment.spot_name,
+    segment.place_name,
+    segment.drama_title,
     segment.description,
     ...(segment.mood || []),
     ...(segment.scene_elements || []),
@@ -8,6 +9,12 @@ function buildSearchText(segment) {
   ]
     .join(' ')
     .toLowerCase()
+}
+
+function matchesSeason(segment, season) {
+  if (!season) return true
+  const segmentSeasons = (segment.season || '').split(',').map((s) => s.trim())
+  return segmentSeasons.includes(season)
 }
 
 function scoreSegment(segment, query) {
@@ -20,14 +27,18 @@ function scoreSegment(segment, query) {
 }
 
 function matchesTheme(segment, themeKeywords) {
-  if (!themeKeywords || themeKeywords.length === 0) return true
+  // null/undefined = no theme selected, don't filter.
+  // [] (a theme selected but with no known keyword matches yet) = match nothing,
+  // rather than silently matching everything.
+  if (themeKeywords == null) return true
+  if (themeKeywords.length === 0) return false
   const text = buildSearchText(segment)
   return themeKeywords.some((keyword) => text.includes(keyword.toLowerCase()))
 }
 
-export function searchSegments(segments, { query = '', season = null, themeKeywords = [] } = {}) {
+export function searchSegments(segments, { query = '', season = null, themeKeywords = null } = {}) {
   return segments
-    .filter((segment) => !season || segment.season === season)
+    .filter((segment) => matchesSeason(segment, season))
     .filter((segment) => matchesTheme(segment, themeKeywords))
     .map((segment) => ({ ...segment, similarity: scoreSegment(segment, query) }))
     .filter((segment) => segment.similarity > 0)

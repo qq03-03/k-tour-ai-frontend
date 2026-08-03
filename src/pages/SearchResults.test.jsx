@@ -15,12 +15,12 @@ function renderAt(path) {
 
 describe('SearchResults', () => {
   it('shows matching results for a query present in the real mock data', () => {
-    renderAt('/search?q=lotus')
-    expect(screen.getByText('연꽃 정원과 오리')).toBeInTheDocument()
+    renderAt('/search?q=canola')
+    expect(screen.getByText('canola_field')).toBeInTheDocument()
   })
 
   it('shows the empty state for a query that matches nothing', () => {
-    renderAt('/search?q=skyscraper subway station')
+    renderAt('/search?q=submarine spaceship dinosaur')
     expect(screen.getByText(/검색 결과가 없어요/)).toBeInTheDocument()
   })
 

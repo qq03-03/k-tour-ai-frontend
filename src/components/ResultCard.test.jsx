@@ -4,31 +4,35 @@ import { describe, it, expect } from 'vitest'
 import ResultCard from './ResultCard.jsx'
 
 const segment = {
-  segment_id: 'SEG_NAMI_02_02',
-  spot_name: '연꽃 정원과 오리',
-  description: 'A serene pond with lotus blossoms and ducks.',
-  start_time: 8.13,
-  end_time: 17.33,
-  keyframe_path: 'keyframes/SEG_NAMI_02_02.jpg',
+  segment_id: 'V008_P013_S001',
+  uid: 'keyframes_GOBLIN_01_GOBLIN_01_SCENE_01_jpg',
+  place_name: 'seaside',
+  region: '강원특별자치도',
+  drama_title: '도깨비',
+  description: 'A man and a woman stand on a rocky pier by the ocean, facing each other with waves crashing in the background.',
+  start_time: 198.0,
+  end_time: 207.0,
+  keyframe_path: 'keyframes/GOBLIN_01/GOBLIN_01_SCENE_01.jpg',
   similarity: 0.92,
 }
 
 describe('ResultCard', () => {
-  it('renders the spot name and similarity percentage', () => {
+  it('renders the place name, drama title, and similarity percentage', () => {
     render(<MemoryRouter><ResultCard segment={segment} /></MemoryRouter>)
-    expect(screen.getByText('연꽃 정원과 오리')).toBeInTheDocument()
+    expect(screen.getByText('seaside')).toBeInTheDocument()
+    expect(screen.getByText(/도깨비/)).toBeInTheDocument()
     expect(screen.getByText('92%')).toBeInTheDocument()
   })
 
   it('resolves the image src under the configured base path', () => {
     render(<MemoryRouter><ResultCard segment={segment} /></MemoryRouter>)
     const src = screen.getByRole('img').getAttribute('src')
-    expect(src.endsWith('keyframes/SEG_NAMI_02_02.jpg')).toBe(true)
+    expect(src.endsWith('keyframes/GOBLIN_01/GOBLIN_01_SCENE_01.jpg')).toBe(true)
     expect(src.includes('//keyframes')).toBe(false)
   })
 
-  it('links to the detail page for this segment', () => {
+  it('links to the detail page using the unique uid, not the (possibly duplicated) segment_id', () => {
     render(<MemoryRouter><ResultCard segment={segment} /></MemoryRouter>)
-    expect(screen.getByRole('link')).toHaveAttribute('href', '/segment/SEG_NAMI_02_02')
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/segment/keyframes_GOBLIN_01_GOBLIN_01_SCENE_01_jpg')
   })
 })

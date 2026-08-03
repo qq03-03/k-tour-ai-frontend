@@ -17,7 +17,7 @@ export default function SearchResults() {
   const query = searchParams.get('q') || ''
   const season = searchParams.get('season')
   const themeId = searchParams.get('theme')
-  const themeKeywords = themes.find((t) => t.id === themeId)?.keywords || []
+  const themeKeywords = themeId ? themes.find((t) => t.id === themeId)?.keywords || [] : null
 
   const results = searchSegments(mockSegments, { query, season, themeKeywords })
 
@@ -49,7 +49,7 @@ export default function SearchResults() {
         {results.length === 0 ? (
           <EmptyState message="검색 결과가 없어요. 다른 검색어를 시도해보세요." />
         ) : (
-          results.map((segment) => <ResultCard key={segment.segment_id} segment={segment} />)
+          results.map((segment) => <ResultCard key={segment.uid} segment={segment} />)
         )}
       </div>
       <Footer />

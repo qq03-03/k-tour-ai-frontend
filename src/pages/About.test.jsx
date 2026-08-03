@@ -10,8 +10,13 @@ describe('About', () => {
     expect(screen.getByText('검색 파이프라인')).toBeInTheDocument()
   })
 
-  it('marks exactly RRF and Query Analysis as pending confirmation', () => {
+  it('marks exactly Query Analysis as pending confirmation (RRF confirmed done per team Slack update)', () => {
     render(<MemoryRouter><About /></MemoryRouter>)
-    expect(screen.getAllByText('🔲 확인 필요')).toHaveLength(2)
+    expect(screen.getAllByText('🔲 확인 필요')).toHaveLength(1)
+  })
+
+  it('marks RRF as done (6 video-pipeline steps + Vector Search + RRF)', () => {
+    render(<MemoryRouter><About /></MemoryRouter>)
+    expect(screen.getAllByText('✅ 완료')).toHaveLength(8)
   })
 })

@@ -1,12 +1,21 @@
 import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect } from 'vitest'
 import DramaSection from './DramaSection.jsx'
 
 describe('DramaSection', () => {
-  it('renders all drama titles', () => {
-    render(<DramaSection />)
+  it('renders real drama titles from mockSegments', () => {
+    render(<MemoryRouter><DramaSection /></MemoryRouter>)
+    expect(screen.getByText('폭싹 속았수다')).toBeInTheDocument()
     expect(screen.getByText('도깨비')).toBeInTheDocument()
-    expect(screen.getByText('웰컴 투 삼달리')).toBeInTheDocument()
-    expect(screen.getByText('미스터 션샤인')).toBeInTheDocument()
+  })
+
+  it('links each drama to its detail page', () => {
+    render(<MemoryRouter><DramaSection /></MemoryRouter>)
+    const links = screen.getAllByRole('link')
+    expect(links.length).toBeGreaterThan(0)
+    for (const link of links) {
+      expect(link.getAttribute('href')).toMatch(/^\/segment\//)
+    }
   })
 })
