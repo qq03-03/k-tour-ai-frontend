@@ -5,9 +5,12 @@ import SearchBar from '../components/SearchBar.jsx'
 import ResultCard from '../components/ResultCard.jsx'
 import EmptyState from '../components/EmptyState.jsx'
 import Footer from '../components/Footer.jsx'
+import KakaoMap from '../components/KakaoMap.jsx'
 import { mockSegments } from '../data/mockSegments.js'
 import { themes } from '../data/themes.js'
+import { placeCoordinates } from '../data/placeCoordinates.js'
 import { searchSegments } from '../lib/searchSegments.js'
+import { getMapMarkers } from '../lib/getMapMarkers.js'
 
 export default function SearchResults() {
   const [searchParams] = useSearchParams()
@@ -41,8 +44,8 @@ export default function SearchResults() {
         </button>
       </div>
       {showMap && (
-        <div style={{ margin: '14px 24px', height: 200, borderRadius: 16, background: '#eef2f7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
-          🗺️ 지도 연동 예정 (스펙 §9 범위 밖)
+        <div style={{ margin: '14px 24px' }}>
+          <KakaoMap markers={getMapMarkers(results, placeCoordinates)} />
         </div>
       )}
       <div style={{ padding: '14px 24px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>

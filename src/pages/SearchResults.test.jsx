@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import SearchResults from './SearchResults.jsx'
 
 function renderAt(path) {
@@ -14,6 +15,22 @@ function renderAt(path) {
 }
 
 describe('SearchResults', () => {
+  beforeEach(() => {
+    window.kakao = {
+      maps: {
+        LatLng: vi.fn(function LatLng() {}),
+        LatLngBounds: vi.fn(function LatLngBounds() {
+          this.extend = vi.fn()
+        }),
+        Map: vi.fn(function Map() {
+          this.setBounds = vi.fn()
+        }),
+        Marker: vi.fn(function Marker() {}),
+        load: (callback) => callback(),
+      },
+    }
+  })
+
   it('shows matching results for a query present in the real mock data', () => {
     renderAt('/search?q=canola')
     expect(screen.getByText('canola_field')).toBeInTheDocument()
@@ -27,5 +44,13 @@ describe('SearchResults', () => {
   it('filters by season from the URL', () => {
     renderAt('/search?season=summer')
     expect(screen.getAllByRole('link').length).toBeGreaterThan(0)
+  })
+
+  it('shows a map with markers when "지도로 보기" is clicked', async () => {
+    const user = userEvent.setup()
+    renderAt('/search?q=palace')
+    await user.click(screen.getByText('🗺️ 지도로 보기'))
+    expect(window.kakao.maps.Map).toHaveBeenCalledTimes(1)
+    expect(window.kakao.maps.Marker).toHaveBeenCalled()
   })
 })

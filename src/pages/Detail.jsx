@@ -1,7 +1,10 @@
 import { useParams, Link } from 'react-router-dom'
 import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
+import KakaoMap from '../components/KakaoMap.jsx'
 import { mockSegments } from '../data/mockSegments.js'
+import { placeCoordinates } from '../data/placeCoordinates.js'
+import { getMapMarkers } from '../lib/getMapMarkers.js'
 
 export default function Detail() {
   const { segmentId: uid } = useParams()
@@ -42,6 +45,10 @@ export default function Detail() {
         <div style={{ background: '#fff', borderRadius: 16, padding: 16, marginBottom: 14, boxShadow: '0 4px 14px rgba(15,23,42,.05)' }}>
           <h4 style={{ margin: '0 0 10px', fontSize: 13 }}>🎬 이 장면이 담긴 드라마</h4>
           <p style={{ margin: 0, fontSize: 13, fontWeight: 700 }}>{segment.drama_title}</p>
+        </div>
+        <div style={{ background: '#fff', borderRadius: 16, padding: 16, boxShadow: '0 4px 14px rgba(15,23,42,.05)' }}>
+          <h4 style={{ margin: '0 0 10px', fontSize: 13 }}>📍 위치</h4>
+          <KakaoMap markers={getMapMarkers([segment], placeCoordinates)} />
         </div>
       </div>
       <Footer />
