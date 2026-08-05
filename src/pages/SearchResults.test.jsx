@@ -33,7 +33,7 @@ describe('SearchResults', () => {
 
   it('shows matching results for a query present in the real mock data', () => {
     renderAt('/search?q=canola')
-    expect(screen.getByText('canola_field')).toBeInTheDocument()
+    expect(screen.getByText('고창 학원농장')).toBeInTheDocument()
   })
 
   it('shows the empty state for a query that matches nothing', () => {

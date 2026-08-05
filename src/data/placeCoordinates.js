@@ -1,6 +1,11 @@
 // Confirmed coordinates from the team's places_coordinates_final.json
 // (shared via Slack #원천데이터-수집 2026-08-04, all status: "확정").
 // Keyed by place_id so multiple segments at the same place share one pin.
+//
+// TODO: P030 (창경궁, split out from P017/창덕궁 in the PR #3 metadata fix) has
+// no confirmed coordinates yet -- ask 김동현 for it. getMapMarkers.js already
+// skips places with no known coordinates, so this is non-breaking in the
+// meantime; that segment just won't show a map pin.
 export const placeCoordinates = {
   P001: { place_name: '화성행궁', latitude: 37.2827, longitude: 127.0141 },
   P002: { place_name: '여의도공원 이벤트광장', latitude: 37.528391, longitude: 126.934242 },

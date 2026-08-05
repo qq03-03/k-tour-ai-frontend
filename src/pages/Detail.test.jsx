@@ -32,7 +32,7 @@ describe('Detail', () => {
 
   it('renders the place name and drama title for a known segment', () => {
     renderAt('keyframes_GOBLIN_01_GOBLIN_01_SCENE_01_jpg')
-    expect(screen.getByText('seaside')).toBeInTheDocument()
+    expect(screen.getByText('강릉 주문진')).toBeInTheDocument()
     expect(screen.getByText('도깨비')).toBeInTheDocument()
   })
 

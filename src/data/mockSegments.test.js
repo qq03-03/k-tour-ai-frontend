@@ -2,13 +2,20 @@ import { describe, it, expect } from 'vitest'
 import { mockSegments } from './mockSegments.js'
 
 describe('mockSegments', () => {
-  it('has exactly 42 entries', () => {
-    expect(mockSegments).toHaveLength(42)
+  it('has exactly 45 entries', () => {
+    expect(mockSegments).toHaveLength(45)
   })
 
-  it('has unique uid values (segment_id is not guaranteed unique in this dataset)', () => {
+  it('has unique uid values', () => {
     const uids = mockSegments.map((s) => s.uid)
     expect(new Set(uids).size).toBe(uids.length)
+  })
+
+  it('normalizes season to the English ids used by data/seasons.js', () => {
+    const validSeasons = new Set(['spring', 'summer', 'autumn', 'winter'])
+    for (const segment of mockSegments) {
+      expect(validSeasons.has(segment.season), `${segment.uid}: ${segment.season}`).toBe(true)
+    }
   })
 
   it('every entry has the required fields', () => {
