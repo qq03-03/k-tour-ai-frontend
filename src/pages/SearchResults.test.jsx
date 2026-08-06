@@ -58,4 +58,11 @@ describe('SearchResults', () => {
     expect(window.kakao.maps.Map).toHaveBeenCalledTimes(1)
     expect(window.kakao.maps.Marker).toHaveBeenCalled()
   })
+
+  it('shows results in English when the language is switched to en', async () => {
+    const user = userEvent.setup()
+    renderAt('/search?q=canola')
+    await user.click(screen.getByRole('button', { name: 'EN' }))
+    expect(await screen.findByText('Hagwon Tourist Farm')).toBeInTheDocument()
+  })
 })
