@@ -23,6 +23,8 @@ describe('Detail', () => {
         }),
         Map: vi.fn(function Map() {
           this.setBounds = vi.fn()
+          this.setCenter = vi.fn()
+          this.relayout = vi.fn()
         }),
         Marker: vi.fn(function Marker() {}),
         load: (callback) => callback(),
@@ -45,5 +47,13 @@ describe('Detail', () => {
   it('renders a not-found message for an unknown uid', () => {
     renderAt('does_not_exist')
     expect(screen.getByText(/찾을 수 없어요/)).toBeInTheDocument()
+  })
+
+  it('links to the original video source for the segment', () => {
+    renderAt('keyframes_GOBLIN_01_GOBLIN_01_SCENE_01_jpg')
+    const link = screen.getByRole('link', { name: /원본 영상 재생/ })
+    expect(link).toHaveAttribute('href', 'https://www.youtube.com/watch?v=mCeMgl6rR-U')
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'))
   })
 })

@@ -4,11 +4,13 @@ import Footer from '../components/Footer.jsx'
 import KakaoMap from '../components/KakaoMap.jsx'
 import { mockSegments } from '../data/mockSegments.js'
 import { placeCoordinates } from '../data/placeCoordinates.js'
+import { videoSources } from '../data/videoSources.js'
 import { getMapMarkers } from '../lib/getMapMarkers.js'
 
 export default function Detail() {
   const { segmentId: uid } = useParams()
   const segment = mockSegments.find((s) => s.uid === uid)
+  const videoSource = segment ? videoSources[segment.video_id] : undefined
 
   if (!segment) {
     return (
@@ -45,6 +47,16 @@ export default function Detail() {
         <div style={{ background: '#fff', borderRadius: 16, padding: 16, marginBottom: 14, boxShadow: '0 4px 14px rgba(15,23,42,.05)' }}>
           <h4 style={{ margin: '0 0 10px', fontSize: 13 }}>🎬 이 장면이 담긴 드라마</h4>
           <p style={{ margin: 0, fontSize: 13, fontWeight: 700 }}>{segment.drama_title}</p>
+          {videoSource && (
+            <a
+              href={videoSource.source_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: 'inline-block', marginTop: 12, background: 'var(--color-primary)', color: 'white', borderRadius: 20, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, textDecoration: 'none' }}
+            >
+              ▶ 원본 영상 재생
+            </a>
+          )}
         </div>
         <div style={{ background: '#fff', borderRadius: 16, padding: 16, boxShadow: '0 4px 14px rgba(15,23,42,.05)' }}>
           <h4 style={{ margin: '0 0 10px', fontSize: 13 }}>📍 위치</h4>
