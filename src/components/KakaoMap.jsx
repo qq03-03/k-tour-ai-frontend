@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 const KAKAO_SDK_SRC = 'https://dapi.kakao.com/v2/maps/sdk.js'
 const DEFAULT_TIMEOUT_MS = 8000
@@ -37,6 +38,7 @@ export default function KakaoMap({ markers, timeoutMs = DEFAULT_TIMEOUT_MS }) {
   const containerRef = useRef(null)
   const [status, setStatus] = useState('loading')
   const [retryCount, setRetryCount] = useState(0)
+  const { t } = useLanguage()
 
   useEffect(() => {
     if (markers.length === 0) return
@@ -98,7 +100,7 @@ export default function KakaoMap({ markers, timeoutMs = DEFAULT_TIMEOUT_MS }) {
   if (markers.length === 0) {
     return (
       <div style={{ height: 200, borderRadius: 16, background: '#eef2f7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: 13 }}>
-        🗺️ 지도에 표시할 위치 정보가 없어요.
+        🗺️ {t('map_empty')}
       </div>
     )
   }
@@ -106,12 +108,12 @@ export default function KakaoMap({ markers, timeoutMs = DEFAULT_TIMEOUT_MS }) {
   if (status === 'error') {
     return (
       <div style={{ height: 200, borderRadius: 16, background: '#eef2f7', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, color: '#94a3b8', fontSize: 13 }}>
-        <span>🗺️ 지도를 불러오지 못했어요. 네트워크 상태를 확인해주세요.</span>
+        <span>🗺️ {t('map_error')}</span>
         <button
           onClick={() => setRetryCount((n) => n + 1)}
           style={{ border: 'none', background: 'var(--color-primary)', color: 'white', borderRadius: 20, padding: '8px 16px', fontSize: 12.5, fontWeight: 700 }}
         >
-          다시 시도
+          {t('map_retry')}
         </button>
       </div>
     )
@@ -121,7 +123,7 @@ export default function KakaoMap({ markers, timeoutMs = DEFAULT_TIMEOUT_MS }) {
     <div style={{ position: 'relative' }}>
       {status === 'loading' && (
         <div style={{ height: 260, borderRadius: 16, background: '#eef2f7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: 13 }}>
-          지도를 불러오는 중...
+          {t('map_loading')}
         </div>
       )}
       <div
