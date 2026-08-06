@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import Detail from './Detail.jsx'
@@ -37,7 +38,7 @@ describe('Detail', () => {
 
   it('renders the place name and drama title for a known segment', () => {
     renderAt('keyframes_GOBLIN_01_GOBLIN_01_SCENE_01_jpg')
-    expect(screen.getByText('강릉 주문진')).toBeInTheDocument()
+    expect(screen.getByText('강릉 주문진방파제')).toBeInTheDocument()
     expect(screen.getByText('도깨비')).toBeInTheDocument()
   })
 
@@ -58,5 +59,12 @@ describe('Detail', () => {
     expect(link).toHaveAttribute('href', 'https://www.youtube.com/watch?v=mCeMgl6rR-U')
     expect(link).toHaveAttribute('target', '_blank')
     expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'))
+  })
+
+  it('shows the place name in English when the language is switched to en', async () => {
+    const user = userEvent.setup()
+    renderAt('keyframes_GOBLIN_01_GOBLIN_01_SCENE_01_jpg')
+    await user.click(screen.getByRole('button', { name: 'EN' }))
+    expect(screen.getByText('Jumunjin Breakwater')).toBeInTheDocument()
   })
 })

@@ -6,10 +6,14 @@ import { mockSegments } from '../data/mockSegments.js'
 import { placeCoordinates } from '../data/placeCoordinates.js'
 import { videoSources } from '../data/videoSources.js'
 import { getMapMarkers } from '../lib/getMapMarkers.js'
+import { localizeSegment } from '../lib/localizeSegment.js'
+import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 export default function Detail() {
   const { segmentId: uid } = useParams()
-  const segment = mockSegments.find((s) => s.uid === uid)
+  const { lang, t } = useLanguage()
+  const found = mockSegments.find((s) => s.uid === uid)
+  const segment = found ? localizeSegment(found, lang) : undefined
   const videoSource = segment ? videoSources[segment.video_id] : undefined
 
   if (!segment) {
@@ -17,8 +21,8 @@ export default function Detail() {
       <div>
         <Header />
         <div style={{ padding: 48, textAlign: 'center', color: '#94a3b8' }}>
-          <p>해당 장면을 찾을 수 없어요.</p>
-          <Link to="/search" style={{ color: 'var(--color-primary)' }}>검색으로 돌아가기</Link>
+          <p>{t('detail_not_found')}</p>
+          <Link to="/search" style={{ color: 'var(--color-primary)' }}>{t('detail_back_to_search')}</Link>
         </div>
         <Footer />
       </div>
@@ -45,7 +49,7 @@ export default function Detail() {
         </div>
         <p style={{ fontSize: 13.5, color: '#334155', lineHeight: 1.6, marginBottom: 20 }}>{segment.description}</p>
         <div style={{ background: '#fff', borderRadius: 16, padding: 16, marginBottom: 14, boxShadow: '0 4px 14px rgba(15,23,42,.05)' }}>
-          <h4 style={{ margin: '0 0 10px', fontSize: 13 }}>🎬 이 장면이 담긴 드라마</h4>
+          <h4 style={{ margin: '0 0 10px', fontSize: 13 }}>🎬 {t('detail_drama_heading')}</h4>
           <p style={{ margin: 0, fontSize: 13, fontWeight: 700 }}>{segment.drama_title}</p>
           {videoSource && (
             <a
@@ -54,12 +58,12 @@ export default function Detail() {
               rel="noopener noreferrer"
               style={{ display: 'inline-block', marginTop: 12, background: 'var(--color-primary)', color: 'white', borderRadius: 20, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, textDecoration: 'none' }}
             >
-              ▶ 원본 영상 재생
+              ▶ {t('detail_play_original')}
             </a>
           )}
         </div>
         <div style={{ background: '#fff', borderRadius: 16, padding: 16, boxShadow: '0 4px 14px rgba(15,23,42,.05)' }}>
-          <h4 style={{ margin: '0 0 10px', fontSize: 13 }}>📍 위치</h4>
+          <h4 style={{ margin: '0 0 10px', fontSize: 13 }}>📍 {t('detail_location_heading')}</h4>
           <KakaoMap markers={getMapMarkers([segment], placeCoordinates)} />
         </div>
       </div>
