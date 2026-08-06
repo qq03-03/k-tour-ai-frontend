@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 export default function SearchBar({ initialValue = '', onSearch }) {
   const [value, setValue] = useState(initialValue)
+  const { t } = useLanguage()
 
   function submit() {
     onSearch(value.trim())
@@ -16,13 +18,13 @@ export default function SearchBar({ initialValue = '', onSearch }) {
       <span>🔍</span>
       <input
         style={{ flex: 1, border: 'none', outline: 'none', fontSize: 14 }}
-        placeholder="Search Destination..."
+        placeholder={t('search_placeholder')}
         value={value}
         onChange={(event) => setValue(event.target.value)}
         onKeyDown={handleKeyDown}
       />
-      <button onClick={submit} aria-label="search" style={{ border: 'none', background: 'var(--color-primary)', color: 'white', borderRadius: 20, padding: '8px 16px', fontWeight: 700 }}>
-        Search
+      <button onClick={submit} aria-label={t('search_button')} style={{ border: 'none', background: 'var(--color-primary)', color: 'white', borderRadius: 20, padding: '8px 16px', fontWeight: 700 }}>
+        {t('search_button')}
       </button>
     </div>
   )

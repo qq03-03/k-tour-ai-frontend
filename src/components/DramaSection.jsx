@@ -1,9 +1,12 @@
 import { Link } from 'react-router-dom'
 import { mockSegments } from '../data/mockSegments.js'
 import { getFeaturedDramas } from '../lib/getFeaturedDramas.js'
+import { localizeSegment } from '../lib/localizeSegment.js'
+import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 export default function DramaSection() {
-  const dramas = getFeaturedDramas(mockSegments)
+  const { lang } = useLanguage()
+  const dramas = getFeaturedDramas(mockSegments).map((segment) => localizeSegment(segment, lang))
 
   return (
     <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 8 }}>

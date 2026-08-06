@@ -26,14 +26,14 @@ function renderHome() {
 describe('Home', () => {
   it('renders the hero tagline and search bar', () => {
     renderHome()
-    expect(screen.getByText(/Discover Korea/i)).toBeInTheDocument()
-    expect(screen.getByPlaceholderText(/search destination/i)).toBeInTheDocument()
+    expect(screen.getByText(/K-드라마/)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('여행지를 검색해보세요...')).toBeInTheDocument()
   })
 
   it('navigates to /search?q=... when a search is submitted', async () => {
     const user = userEvent.setup()
     renderHome()
-    await user.type(screen.getByPlaceholderText(/search destination/i), 'lotus{Enter}')
+    await user.type(screen.getByPlaceholderText('여행지를 검색해보세요...'), 'lotus{Enter}')
     expect(screen.getByTestId('location')).toHaveTextContent('/search?q=lotus')
   })
 

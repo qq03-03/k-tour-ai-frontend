@@ -1,10 +1,11 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
 import Hero from './Hero.jsx'
+import { renderWithLanguage } from '../test-utils.jsx'
 
 describe('Hero', () => {
   it('renders the tagline', () => {
-    render(<Hero />)
-    expect(screen.getByText(/Discover Korea/i)).toBeInTheDocument()
+    renderWithLanguage(<Hero />)
+    expect(screen.getByText(/K-드라마/)).toBeInTheDocument()
   })
 })
