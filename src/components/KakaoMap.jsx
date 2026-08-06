@@ -14,7 +14,12 @@ function loadKakaoSdk(appKey, timeoutMs) {
     // resolve, since those events don't replay for newly added listeners.
     document.querySelectorAll('script[data-kakao-map-sdk]').forEach((old) => old.remove())
     const script = document.createElement('script')
-    script.src = `${KAKAO_SDK_SRC}?appkey=${appKey}&autoload=false`
+    // Cache-bust: this app's Kakao service was disabled for part of testing,
+    // during which some clients cached an error response for this exact URL.
+    // A stable query string could keep serving that stale cached response
+    // (which trips ERR_BLOCKED_BY_ORB); a per-load timestamp forces a fresh
+    // fetch every time.
+    script.src = `${KAKAO_SDK_SRC}?appkey=${appKey}&autoload=false&_=${Date.now()}`
     script.dataset.kakaoMapSdk = 'true'
     script.addEventListener('load', () => window.kakao.maps.load(() => resolve(window.kakao)))
     script.addEventListener('error', () => reject(new Error('Failed to load Kakao Maps SDK')))
