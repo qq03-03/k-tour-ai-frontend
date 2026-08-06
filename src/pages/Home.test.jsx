@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { describe, it, expect } from 'vitest'
 import Home from './Home.jsx'
+import { LanguageProvider } from '../i18n/LanguageContext.jsx'
 
 function LocationDisplay() {
   const location = useLocation()
@@ -11,12 +12,14 @@ function LocationDisplay() {
 
 function renderHome() {
   return render(
-    <MemoryRouter initialEntries={['/']}>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/search" element={<LocationDisplay />} />
-      </Routes>
-    </MemoryRouter>,
+    <LanguageProvider>
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/search" element={<LocationDisplay />} />
+        </Routes>
+      </MemoryRouter>
+    </LanguageProvider>,
   )
 }
 

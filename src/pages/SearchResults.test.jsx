@@ -3,14 +3,17 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import SearchResults from './SearchResults.jsx'
+import { LanguageProvider } from '../i18n/LanguageContext.jsx'
 
 function renderAt(path) {
   return render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/search" element={<SearchResults />} />
-      </Routes>
-    </MemoryRouter>,
+    <LanguageProvider>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/search" element={<SearchResults />} />
+        </Routes>
+      </MemoryRouter>
+    </LanguageProvider>,
   )
 }
 

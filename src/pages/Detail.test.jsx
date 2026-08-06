@@ -2,14 +2,17 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import Detail from './Detail.jsx'
+import { LanguageProvider } from '../i18n/LanguageContext.jsx'
 
 function renderAt(uid) {
   return render(
-    <MemoryRouter initialEntries={[`/segment/${uid}`]}>
-      <Routes>
-        <Route path="/segment/:segmentId" element={<Detail />} />
-      </Routes>
-    </MemoryRouter>,
+    <LanguageProvider>
+      <MemoryRouter initialEntries={[`/segment/${uid}`]}>
+        <Routes>
+          <Route path="/segment/:segmentId" element={<Detail />} />
+        </Routes>
+      </MemoryRouter>
+    </LanguageProvider>,
   )
 }
 
@@ -23,8 +26,6 @@ describe('Detail', () => {
         }),
         Map: vi.fn(function Map() {
           this.setBounds = vi.fn()
-          this.setCenter = vi.fn()
-          this.relayout = vi.fn()
         }),
         Marker: vi.fn(function Marker() {}),
         load: (callback) => callback(),
