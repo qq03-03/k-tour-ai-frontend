@@ -621,6 +621,8 @@ describe('SearchResults', () => {
         }),
         Map: vi.fn(function Map() {
           this.setBounds = vi.fn()
+          this.setCenter = vi.fn()
+          this.relayout = vi.fn()
         }),
         Marker: vi.fn(function Marker() {}),
         load: (callback) => callback(),
@@ -684,6 +686,8 @@ describe('Detail', () => {
         }),
         Map: vi.fn(function Map() {
           this.setBounds = vi.fn()
+          this.setCenter = vi.fn()
+          this.relayout = vi.fn()
         }),
         Marker: vi.fn(function Marker() {}),
         load: (callback) => callback(),
