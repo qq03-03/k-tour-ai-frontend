@@ -40,7 +40,7 @@ describe('Home', () => {
   it('navigates to /search?season=... when a season chip is clicked', async () => {
     const user = userEvent.setup()
     renderHome()
-    await user.click(screen.getByText('Summer'))
+    await user.click(screen.getByText('여름'))
     expect(screen.getByTestId('location')).toHaveTextContent('/search?season=summer')
   })
 })
