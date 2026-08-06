@@ -28,4 +28,10 @@ describe('SeasonSection', () => {
     await user.click(screen.getByText('여름'))
     expect(onSelect).toHaveBeenCalledWith(null)
   })
+
+  it('renders season chips in English when the language is set to en', () => {
+    window.localStorage.setItem('ktourai_lang', 'en')
+    renderWithLanguage(<SeasonSection selectedId={null} onSelect={() => {}} />)
+    expect(screen.getByText('Spring')).toBeInTheDocument()
+  })
 })

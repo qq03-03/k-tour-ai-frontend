@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { strings } from './strings.js'
 
 const STORAGE_KEY = 'ktourai_lang'
@@ -20,6 +20,10 @@ export function LanguageProvider({ children }) {
     window.localStorage.setItem(STORAGE_KEY, next)
     setLangState(next)
   }, [])
+
+  useEffect(() => {
+    document.documentElement.lang = lang
+  }, [lang])
 
   const t = useCallback(
     (key, params) => {

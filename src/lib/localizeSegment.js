@@ -13,7 +13,7 @@ export function localizeSegment(segment, lang, translations = segmentTranslation
 
   const result = { ...segment }
   for (const field of LOCALIZABLE_FIELDS) {
-    result[field] = localized[field]
+    result[field] = localized[field] ?? segment[field]
   }
   return result
 }

@@ -23,7 +23,7 @@ export default function SearchBar({ initialValue = '', onSearch }) {
         onChange={(event) => setValue(event.target.value)}
         onKeyDown={handleKeyDown}
       />
-      <button onClick={submit} aria-label={t('search_button')} style={{ border: 'none', background: 'var(--color-primary)', color: 'white', borderRadius: 20, padding: '8px 16px', fontWeight: 700 }}>
+      <button onClick={submit} style={{ border: 'none', background: 'var(--color-primary)', color: 'white', borderRadius: 20, padding: '8px 16px', fontWeight: 700 }}>
         {t('search_button')}
       </button>
     </div>

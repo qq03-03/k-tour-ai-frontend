@@ -19,4 +19,10 @@ describe('ThemeSection', () => {
     await user.click(screen.getByText('해변'))
     expect(onSelect).toHaveBeenCalledWith('beach')
   })
+
+  it('renders theme tags in English when the language is set to en', () => {
+    window.localStorage.setItem('ktourai_lang', 'en')
+    renderWithLanguage(<ThemeSection selectedId={null} onSelect={() => {}} />)
+    expect(screen.getByText('Beach')).toBeInTheDocument()
+  })
 })
