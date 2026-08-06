@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect } from 'vitest'
 import About from './About.jsx'
@@ -23,5 +24,12 @@ describe('About', () => {
   it('marks RRF as done (6 video-pipeline steps + Vector Search + RRF)', () => {
     renderAbout()
     expect(screen.getAllByText('✅ 완료')).toHaveLength(8)
+  })
+
+  it('switches pipeline titles to English when the EN button is clicked', async () => {
+    const user = userEvent.setup()
+    renderAbout()
+    await user.click(screen.getByRole('button', { name: 'EN' }))
+    expect(screen.getByText('Video Processing Pipeline')).toBeInTheDocument()
   })
 })
