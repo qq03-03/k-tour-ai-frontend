@@ -42,6 +42,7 @@ export default function KakaoMap({ markers, timeoutMs = DEFAULT_TIMEOUT_MS }) {
     if (markers.length === 0) return
 
     let cancelled = false
+    let resizeObserver
     setStatus('loading')
     const appKey = import.meta.env.VITE_KAKAO_MAP_KEY
 
@@ -59,7 +60,28 @@ export default function KakaoMap({ markers, timeoutMs = DEFAULT_TIMEOUT_MS }) {
           bounds.extend(position)
         })
 
-        if (markers.length > 1) map.setBounds(bounds)
+        // The map is created while its container is inside a conditionally
+        // rendered (list/map toggle) flex layout, so the container isn't
+        // always at its final width on the first paint yet. relayout() makes
+        // the map re-measure the container; without it, the map keeps the
+        // undersized dimensions it was born with and renders as a small tile
+        // repeated as blank watermark. The ResizeObserver reapplies this if
+        // the container resizes again later (toggle, window resize).
+        const fitToContainer = () => {
+          map.relayout()
+          if (markers.length > 1) {
+            map.setBounds(bounds)
+          } else {
+            map.setCenter(center)
+          }
+        }
+        fitToContainer()
+
+        if (typeof ResizeObserver !== 'undefined') {
+          resizeObserver = new ResizeObserver(fitToContainer)
+          resizeObserver.observe(containerRef.current)
+        }
+
         setStatus('ready')
       })
       .catch(() => {
@@ -69,6 +91,7 @@ export default function KakaoMap({ markers, timeoutMs = DEFAULT_TIMEOUT_MS }) {
 
     return () => {
       cancelled = true
+      if (resizeObserver) resizeObserver.disconnect()
     }
   }, [markers, timeoutMs, retryCount])
 

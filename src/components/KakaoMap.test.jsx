@@ -38,6 +38,8 @@ describe('KakaoMap', () => {
         }),
         Map: vi.fn(function Map() {
           this.setBounds = vi.fn()
+          this.setCenter = vi.fn()
+          this.relayout = vi.fn()
         }),
         Marker: vi.fn(function Marker() {}),
         load: (callback) => callback(),
@@ -47,6 +49,29 @@ describe('KakaoMap', () => {
     await flushPromises()
     expect(window.kakao.maps.Map).toHaveBeenCalledTimes(1)
     expect(screen.queryByText(/지도를 불러오는 중/)).not.toBeInTheDocument()
+  })
+
+  it('relays out the map so a container mis-measured at creation time re-fits', async () => {
+    window.kakao = {
+      maps: {
+        LatLng: vi.fn(function LatLng() {}),
+        LatLngBounds: vi.fn(function LatLngBounds() {
+          this.extend = vi.fn()
+        }),
+        Map: vi.fn(function Map() {
+          this.setBounds = vi.fn()
+          this.setCenter = vi.fn()
+          this.relayout = vi.fn()
+        }),
+        Marker: vi.fn(function Marker() {}),
+        load: (callback) => callback(),
+      },
+    }
+    render(<KakaoMap markers={oneMarker} />)
+    await flushPromises()
+    const mapInstance = window.kakao.maps.Map.mock.results[0].value
+    expect(mapInstance.relayout).toHaveBeenCalled()
+    expect(mapInstance.setCenter).toHaveBeenCalled()
   })
 
   it('shows an error message and a retry button when the SDK script fails to load', async () => {
@@ -83,6 +108,8 @@ describe('KakaoMap', () => {
         }),
         Map: vi.fn(function Map() {
           this.setBounds = vi.fn()
+          this.setCenter = vi.fn()
+          this.relayout = vi.fn()
         }),
         Marker: vi.fn(function Marker() {}),
         load: (callback) => callback(),
