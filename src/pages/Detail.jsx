@@ -7,6 +7,7 @@ import { placeCoordinates } from '../data/placeCoordinates.js'
 import { videoSources } from '../data/videoSources.js'
 import { getMapMarkers } from '../lib/getMapMarkers.js'
 import { localizeSegment } from '../lib/localizeSegment.js'
+import { buildVideoUrl } from '../lib/buildVideoUrl.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 export default function Detail() {
@@ -32,8 +33,14 @@ export default function Detail() {
   return (
     <div>
       <Header />
-      <div style={{ position: 'relative', height: 200, background: 'linear-gradient(135deg,#c7d2fe,#a5f3fc)' }}>
-        <img src={`${import.meta.env.BASE_URL}${segment.keyframe_path}`} alt={segment.place_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      <div className="detail-media-row">
+        <div className="detail-media-row__image" style={{ position: 'relative', height: 200, background: 'linear-gradient(135deg,#c7d2fe,#a5f3fc)' }}>
+          <img src={`${import.meta.env.BASE_URL}${segment.keyframe_path}`} alt={segment.place_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </div>
+        <div className="detail-media-row__map" style={{ background: '#fff', borderRadius: 16, padding: 16, boxShadow: '0 4px 14px rgba(15,23,42,.05)' }}>
+          <h4 style={{ margin: '0 0 10px', fontSize: 13 }}>📍 {t('detail_location_heading')}</h4>
+          <KakaoMap markers={getMapMarkers([segment], placeCoordinates)} />
+        </div>
       </div>
       <div style={{ padding: '20px 24px' }}>
         <h2 style={{ margin: 0, fontSize: 19 }}>{segment.place_name}</h2>
@@ -48,12 +55,12 @@ export default function Detail() {
           ))}
         </div>
         <p style={{ fontSize: 13.5, color: '#334155', lineHeight: 1.6, marginBottom: 20 }}>{segment.description}</p>
-        <div style={{ background: '#fff', borderRadius: 16, padding: 16, marginBottom: 14, boxShadow: '0 4px 14px rgba(15,23,42,.05)' }}>
+        <div style={{ background: '#fff', borderRadius: 16, padding: 16, boxShadow: '0 4px 14px rgba(15,23,42,.05)' }}>
           <h4 style={{ margin: '0 0 10px', fontSize: 13 }}>🎬 {t('detail_drama_heading')}</h4>
           <p style={{ margin: 0, fontSize: 13, fontWeight: 700 }}>{segment.drama_title}</p>
           {videoSource && (
             <a
-              href={videoSource.source_url}
+              href={buildVideoUrl(videoSource.source_url, segment.start_time)}
               target="_blank"
               rel="noopener noreferrer"
               style={{ display: 'inline-block', marginTop: 12, background: 'var(--color-primary)', color: 'white', borderRadius: 20, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, textDecoration: 'none' }}
@@ -61,10 +68,6 @@ export default function Detail() {
               ▶ {t('detail_play_original')}
             </a>
           )}
-        </div>
-        <div style={{ background: '#fff', borderRadius: 16, padding: 16, boxShadow: '0 4px 14px rgba(15,23,42,.05)' }}>
-          <h4 style={{ margin: '0 0 10px', fontSize: 13 }}>📍 {t('detail_location_heading')}</h4>
-          <KakaoMap markers={getMapMarkers([segment], placeCoordinates)} />
         </div>
       </div>
       <Footer />

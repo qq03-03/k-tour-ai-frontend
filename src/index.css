@@ -24,3 +24,36 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+/* Detail page: image + map stack on mobile (image full-bleed on top, map
+   further down as its own card), but sit side by side as two matching
+   cards on wider screens so the photo and its location can be compared
+   at a glance instead of scrolling between them. */
+.detail-media-row {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.detail-media-row__map {
+  margin: 20px 24px 0;
+}
+
+@media (min-width: 900px) {
+  .detail-media-row {
+    grid-template-columns: 1fr 1fr;
+    align-items: stretch;
+    gap: 20px;
+    padding: 24px 24px 0;
+  }
+
+  .detail-media-row__image {
+    height: auto !important;
+    min-height: 320px;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .detail-media-row__map {
+    margin: 0;
+  }
+}

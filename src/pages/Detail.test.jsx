@@ -56,7 +56,7 @@ describe('Detail', () => {
   it('links to the original video source for the segment', () => {
     renderAt('keyframes_GOBLIN_01_GOBLIN_01_SCENE_01_jpg')
     const link = screen.getByRole('link', { name: /원본 영상 재생/ })
-    expect(link).toHaveAttribute('href', 'https://www.youtube.com/watch?v=mCeMgl6rR-U')
+    expect(link).toHaveAttribute('href', 'https://www.youtube.com/watch?v=mCeMgl6rR-U&t=202s')
     expect(link).toHaveAttribute('target', '_blank')
     expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'))
   })
