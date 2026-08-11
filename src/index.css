@@ -25,35 +25,30 @@ a {
   text-decoration: none;
 }
 
-/* Detail page: image + map stack on mobile (image full-bleed on top, map
-   further down as its own card), but sit side by side as two matching
-   cards on wider screens so the photo and its location can be compared
-   at a glance instead of scrolling between them. */
+/* Detail page: photo and map render as two matching cards (same radius,
+   shadow, and height) below the description, stacked on mobile and side
+   by side on wider screens so they're easy to compare at a glance. */
 .detail-media-row {
   display: grid;
   grid-template-columns: 1fr;
+  gap: 20px;
+  padding: 0 24px 24px;
 }
 
-.detail-media-row__map {
-  margin: 20px 24px 0;
+.detail-media-row__image {
+  height: 260px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, .05);
 }
 
 @media (min-width: 900px) {
   .detail-media-row {
     grid-template-columns: 1fr 1fr;
     align-items: stretch;
-    gap: 20px;
-    padding: 24px 24px 0;
   }
 
   .detail-media-row__image {
-    height: auto !important;
-    min-height: 320px;
-    border-radius: 16px;
-    overflow: hidden;
-  }
-
-  .detail-media-row__map {
-    margin: 0;
+    height: auto;
   }
 }

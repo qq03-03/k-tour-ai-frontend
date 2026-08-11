@@ -33,15 +33,6 @@ export default function Detail() {
   return (
     <div>
       <Header />
-      <div className="detail-media-row">
-        <div className="detail-media-row__image" style={{ position: 'relative', height: 200, background: 'linear-gradient(135deg,#c7d2fe,#a5f3fc)' }}>
-          <img src={`${import.meta.env.BASE_URL}${segment.keyframe_path}`} alt={segment.place_name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        </div>
-        <div className="detail-media-row__map" style={{ background: '#fff', borderRadius: 16, padding: 16, boxShadow: '0 4px 14px rgba(15,23,42,.05)' }}>
-          <h4 style={{ margin: '0 0 10px', fontSize: 13 }}>📍 {t('detail_location_heading')}</h4>
-          <KakaoMap markers={getMapMarkers([segment], placeCoordinates)} />
-        </div>
-      </div>
       <div style={{ padding: '20px 24px' }}>
         <h2 style={{ margin: 0, fontSize: 19 }}>{segment.place_name}</h2>
         <p style={{ fontSize: 12.5, color: '#64748b', margin: '4px 0 14px' }}>
@@ -68,6 +59,15 @@ export default function Detail() {
               ▶ {t('detail_play_original')}
             </a>
           )}
+        </div>
+      </div>
+      <div className="detail-media-row">
+        <div className="detail-media-row__image">
+          <img src={`${import.meta.env.BASE_URL}${segment.keyframe_path}`} alt={segment.place_name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+        </div>
+        <div className="detail-media-row__map" style={{ background: '#fff', borderRadius: 16, padding: 16, boxShadow: '0 4px 14px rgba(15,23,42,.05)' }}>
+          <h4 style={{ margin: '0 0 10px', fontSize: 13 }}>📍 {t('detail_location_heading')}</h4>
+          <KakaoMap markers={getMapMarkers([segment], placeCoordinates)} />
         </div>
       </div>
       <Footer />
