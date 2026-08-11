@@ -29,6 +29,7 @@ describe('About', () => {
   it('switches pipeline titles to English when the EN button is clicked', async () => {
     const user = userEvent.setup()
     renderAbout()
+    await user.click(screen.getByRole('button', { name: '메뉴' }))
     await user.click(screen.getByRole('button', { name: 'EN' }))
     expect(screen.getByText('Video Processing Pipeline')).toBeInTheDocument()
   })

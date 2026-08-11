@@ -34,6 +34,13 @@ function loadKakaoSdk(appKey, timeoutMs) {
   return Promise.race([loadPromise, timeoutPromise])
 }
 
+function buildInfoWindowContent(marker) {
+  const dramaLine = marker.dramaTitles && marker.dramaTitles.length > 0
+    ? `<div style="font-size:11px;color:#64748b;margin-top:2px;">${marker.dramaTitles.join(', ')}</div>`
+    : ''
+  return `<div style="padding:8px 12px;font-size:12px;font-weight:700;color:#1e293b;white-space:nowrap;">${marker.label}${dramaLine}</div>`
+}
+
 export default function KakaoMap({ markers, timeoutMs = DEFAULT_TIMEOUT_MS }) {
   const containerRef = useRef(null)
   const [status, setStatus] = useState('loading')
@@ -56,10 +63,21 @@ export default function KakaoMap({ markers, timeoutMs = DEFAULT_TIMEOUT_MS }) {
         const map = new kakao.maps.Map(containerRef.current, { center, level: 8 })
         const bounds = new kakao.maps.LatLngBounds()
 
+        // Only one pin's info window should be visible at a time, so clicking
+        // a new pin closes whichever one is currently open.
+        let openInfoWindow = null
+
         markers.forEach((marker) => {
           const position = new kakao.maps.LatLng(marker.latitude, marker.longitude)
-          new kakao.maps.Marker({ map, position, title: marker.label })
+          const markerInstance = new kakao.maps.Marker({ map, position, title: marker.label })
           bounds.extend(position)
+
+          const infoWindow = new kakao.maps.InfoWindow({ content: buildInfoWindowContent(marker) })
+          kakao.maps.event.addListener(markerInstance, 'click', () => {
+            if (openInfoWindow) openInfoWindow.close()
+            infoWindow.open(map, markerInstance)
+            openInfoWindow = infoWindow
+          })
         })
 
         // The map is created while its container is inside a conditionally

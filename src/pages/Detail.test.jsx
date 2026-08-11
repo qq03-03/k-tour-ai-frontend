@@ -31,6 +31,11 @@ describe('Detail', () => {
           this.relayout = vi.fn()
         }),
         Marker: vi.fn(function Marker() {}),
+        InfoWindow: vi.fn(function InfoWindow() {
+          this.open = vi.fn()
+          this.close = vi.fn()
+        }),
+        event: { addListener: vi.fn() },
         load: (callback) => callback(),
       },
     }
@@ -64,6 +69,7 @@ describe('Detail', () => {
   it('shows the place name in English when the language is switched to en', async () => {
     const user = userEvent.setup()
     renderAt('keyframes_GOBLIN_01_GOBLIN_01_SCENE_01_jpg')
+    await user.click(screen.getByRole('button', { name: '메뉴' }))
     await user.click(screen.getByRole('button', { name: 'EN' }))
     expect(screen.getByText('Jumunjin Breakwater')).toBeInTheDocument()
   })

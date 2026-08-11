@@ -17,11 +17,11 @@ function renderAt(path) {
 describe('App routing', () => {
   it('renders Home at /', () => {
     renderAt('/')
-    expect(screen.getByText('홈')).toBeInTheDocument()
+    expect(screen.getByText(/K-드라마/)).toBeInTheDocument()
   })
 
   it('renders About at /about', () => {
     renderAt('/about')
-    expect(screen.getByText('소개')).toBeInTheDocument()
+    expect(screen.getByText('영상 처리 파이프라인')).toBeInTheDocument()
   })
 })

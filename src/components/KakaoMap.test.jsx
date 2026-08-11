@@ -8,7 +8,31 @@ function flushPromises() {
   return new Promise((resolve) => setTimeout(resolve, 0))
 }
 
-const oneMarker = [{ place_id: 'P001', label: '경복궁', latitude: 37.5, longitude: 127.0 }]
+function createKakaoMock() {
+  return {
+    maps: {
+      LatLng: vi.fn(function LatLng() {}),
+      LatLngBounds: vi.fn(function LatLngBounds() {
+        this.extend = vi.fn()
+      }),
+      Map: vi.fn(function Map() {
+        this.setBounds = vi.fn()
+        this.setCenter = vi.fn()
+        this.relayout = vi.fn()
+      }),
+      Marker: vi.fn(function Marker() {}),
+      InfoWindow: vi.fn(function InfoWindow(options) {
+        this.content = options.content
+        this.open = vi.fn()
+        this.close = vi.fn()
+      }),
+      event: { addListener: vi.fn() },
+      load: (callback) => callback(),
+    },
+  }
+}
+
+const oneMarker = [{ place_id: 'P001', label: '경복궁', latitude: 37.5, longitude: 127.0, dramaTitles: ['도깨비'] }]
 
 describe('KakaoMap', () => {
   beforeEach(() => {
@@ -31,21 +55,7 @@ describe('KakaoMap', () => {
   })
 
   it('renders a map once the SDK loads', async () => {
-    window.kakao = {
-      maps: {
-        LatLng: vi.fn(function LatLng() {}),
-        LatLngBounds: vi.fn(function LatLngBounds() {
-          this.extend = vi.fn()
-        }),
-        Map: vi.fn(function Map() {
-          this.setBounds = vi.fn()
-          this.setCenter = vi.fn()
-          this.relayout = vi.fn()
-        }),
-        Marker: vi.fn(function Marker() {}),
-        load: (callback) => callback(),
-      },
-    }
+    window.kakao = createKakaoMock()
     renderWithLanguage(<KakaoMap markers={oneMarker} />)
     await flushPromises()
     expect(window.kakao.maps.Map).toHaveBeenCalledTimes(1)
@@ -53,26 +63,30 @@ describe('KakaoMap', () => {
   })
 
   it('relays out the map so a container mis-measured at creation time re-fits', async () => {
-    window.kakao = {
-      maps: {
-        LatLng: vi.fn(function LatLng() {}),
-        LatLngBounds: vi.fn(function LatLngBounds() {
-          this.extend = vi.fn()
-        }),
-        Map: vi.fn(function Map() {
-          this.setBounds = vi.fn()
-          this.setCenter = vi.fn()
-          this.relayout = vi.fn()
-        }),
-        Marker: vi.fn(function Marker() {}),
-        load: (callback) => callback(),
-      },
-    }
+    window.kakao = createKakaoMock()
     renderWithLanguage(<KakaoMap markers={oneMarker} />)
     await flushPromises()
     const mapInstance = window.kakao.maps.Map.mock.results[0].value
     expect(mapInstance.relayout).toHaveBeenCalled()
     expect(mapInstance.setCenter).toHaveBeenCalled()
+  })
+
+  it('opens an info window with the place name and drama titles when a marker is clicked', async () => {
+    window.kakao = createKakaoMock()
+    renderWithLanguage(<KakaoMap markers={oneMarker} />)
+    await flushPromises()
+
+    expect(window.kakao.maps.event.addListener).toHaveBeenCalledTimes(1)
+    const [markerInstance, eventName, handler] = window.kakao.maps.event.addListener.mock.calls[0]
+    expect(eventName).toBe('click')
+
+    const infoWindowInstance = window.kakao.maps.InfoWindow.mock.results[0].value
+    expect(infoWindowInstance.content).toContain('경복궁')
+    expect(infoWindowInstance.content).toContain('도깨비')
+
+    handler()
+    const mapInstance = window.kakao.maps.Map.mock.results[0].value
+    expect(infoWindowInstance.open).toHaveBeenCalledWith(mapInstance, markerInstance)
   })
 
   it('shows an error message and a retry button when the SDK script fails to load', async () => {
@@ -101,21 +115,7 @@ describe('KakaoMap', () => {
     script.dispatchEvent(new Event('error'))
     await waitFor(() => screen.getByRole('button', { name: /다시 시도/ }))
 
-    window.kakao = {
-      maps: {
-        LatLng: vi.fn(function LatLng() {}),
-        LatLngBounds: vi.fn(function LatLngBounds() {
-          this.extend = vi.fn()
-        }),
-        Map: vi.fn(function Map() {
-          this.setBounds = vi.fn()
-          this.setCenter = vi.fn()
-          this.relayout = vi.fn()
-        }),
-        Marker: vi.fn(function Marker() {}),
-        load: (callback) => callback(),
-      },
-    }
+    window.kakao = createKakaoMock()
     await user.click(screen.getByRole('button', { name: /다시 시도/ }))
     await flushPromises()
     expect(window.kakao.maps.Map).toHaveBeenCalledTimes(1)

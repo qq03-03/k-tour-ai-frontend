@@ -31,6 +31,11 @@ describe('SearchResults', () => {
           this.relayout = vi.fn()
         }),
         Marker: vi.fn(function Marker() {}),
+        InfoWindow: vi.fn(function InfoWindow() {
+          this.open = vi.fn()
+          this.close = vi.fn()
+        }),
+        event: { addListener: vi.fn() },
         load: (callback) => callback(),
       },
     }
@@ -62,6 +67,7 @@ describe('SearchResults', () => {
   it('shows results in English when the language is switched to en', async () => {
     const user = userEvent.setup()
     renderAt('/search?q=canola')
+    await user.click(screen.getByRole('button', { name: '메뉴' }))
     await user.click(screen.getByRole('button', { name: 'EN' }))
     expect(await screen.findByText('Hagwon Tourist Farm')).toBeInTheDocument()
   })

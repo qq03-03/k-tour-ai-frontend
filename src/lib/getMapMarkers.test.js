@@ -7,9 +7,9 @@ const coordinates = {
 }
 
 const segments = [
-  { uid: 'a', place_id: 'P001', place_name: 'Gyeongbokgung Palace' },
-  { uid: 'b', place_id: 'P001', place_name: 'Gyeongbokgung Palace' },
-  { uid: 'c', place_id: 'P002', place_name: 'Mang Island' },
+  { uid: 'a', place_id: 'P001', place_name: 'Gyeongbokgung Palace', drama_title: '도깨비' },
+  { uid: 'b', place_id: 'P001', place_name: 'Gyeongbokgung Palace', drama_title: '도깨비' },
+  { uid: 'c', place_id: 'P002', place_name: 'Mang Island', drama_title: '그 해 우리는' },
 ]
 
 describe('getMapMarkers', () => {
@@ -39,5 +39,21 @@ describe('getMapMarkers', () => {
 
   it('returns an empty array for no segments', () => {
     expect(getMapMarkers([], coordinates)).toEqual([])
+  })
+
+  it('collects the distinct drama titles filmed at each place', () => {
+    const result = getMapMarkers(segments, coordinates)
+    const gyeongbokgung = result.find((m) => m.place_id === 'P001')
+    expect(gyeongbokgung.dramaTitles).toEqual(['도깨비'])
+  })
+
+  it('collects multiple distinct drama titles for the same place without duplicates', () => {
+    const withSecondDrama = [
+      ...segments,
+      { uid: 'e', place_id: 'P001', place_name: 'Gyeongbokgung Palace', drama_title: '슬기로운 의사생활' },
+    ]
+    const result = getMapMarkers(withSecondDrama, coordinates)
+    const gyeongbokgung = result.find((m) => m.place_id === 'P001')
+    expect(gyeongbokgung.dramaTitles).toEqual(['도깨비', '슬기로운 의사생활'])
   })
 })

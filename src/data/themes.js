@@ -9,7 +9,5 @@ export const themes = [
   { id: 'cherry-blossom', icon: '🌸', label: { ko: '벚꽃', en: 'Cherry Blossom', ja: '桜', zh: '樱花' }, keywords: [] },
   { id: 'autumn-leaves', icon: '🍁', label: { ko: '단풍', en: 'Autumn Leaves', ja: '紅葉', zh: '红叶' }, keywords: ['autumn'] },
   { id: 'beach', icon: '🏖', label: { ko: '해변', en: 'Beach', ja: 'ビーチ', zh: '海滩' }, keywords: ['beach', 'ocean', 'sea'] },
-  { id: 'cafe', icon: '☕', label: { ko: '카페', en: 'Cafe', ja: 'カフェ', zh: '咖啡厅' }, keywords: [] },
-  { id: 'food', icon: '🍜', label: { ko: '음식', en: 'Food', ja: 'グルメ', zh: '美食' }, keywords: [] },
   { id: 'drama', icon: '🎬', label: { ko: '드라마', en: 'Drama', ja: 'ドラマ', zh: '电视剧' }, keywords: ['hanok', 'palace', 'traditional'] },
 ]

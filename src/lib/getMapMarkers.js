@@ -1,19 +1,28 @@
 // Reduces a list of segments to one marker per unique place_id, using the
 // confirmed lat/lng from placeCoordinates.js. Segments whose place_id has no
-// known coordinates are skipped rather than guessed.
+// known coordinates are skipped rather than guessed. dramaTitles collects
+// every distinct drama filmed at that place (first-seen order) so the map
+// pin's info window can show what was shot there, not just the place name.
 export function getMapMarkers(segments, coordinates) {
-  const seen = new Set()
-  const markers = []
+  const markersByPlaceId = new Map()
   for (const segment of segments) {
     const coord = coordinates[segment.place_id]
-    if (!coord || seen.has(segment.place_id)) continue
-    seen.add(segment.place_id)
-    markers.push({
-      place_id: segment.place_id,
-      label: coord.place_name,
-      latitude: coord.latitude,
-      longitude: coord.longitude,
-    })
+    if (!coord) continue
+
+    let marker = markersByPlaceId.get(segment.place_id)
+    if (!marker) {
+      marker = {
+        place_id: segment.place_id,
+        label: coord.place_name,
+        latitude: coord.latitude,
+        longitude: coord.longitude,
+        dramaTitles: [],
+      }
+      markersByPlaceId.set(segment.place_id, marker)
+    }
+    if (segment.drama_title && !marker.dramaTitles.includes(segment.drama_title)) {
+      marker.dramaTitles.push(segment.drama_title)
+    }
   }
-  return markers
+  return [...markersByPlaceId.values()]
 }
