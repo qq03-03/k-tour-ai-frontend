@@ -42,8 +42,12 @@ describe('SearchResults', () => {
   })
 
   it('shows matching results for a query present in the real mock data', () => {
+    // 고창 학원농장 now matches twice: once from the original 45-segment dataset
+    // (real image) and once from the 517-segment dataset (namespaced place_id,
+    // no image yet) -- this duplication is expected, see
+    // docs/superpowers/specs/2026-08-19-517-segment-dataset-integration-design.md.
     renderAt('/search?q=canola')
-    expect(screen.getByText('고창 학원농장')).toBeInTheDocument()
+    expect(screen.getAllByText('고창 학원농장').length).toBeGreaterThan(0)
   })
 
   it('shows the empty state for a query that matches nothing', () => {
@@ -52,9 +56,12 @@ describe('SearchResults', () => {
   })
 
   it('filters by season from the URL', () => {
+    // 284 of the 562 total segments match season=summer after the 517-segment
+    // dataset was added (vs. a handful out of 45 before), so this renders far
+    // more ResultCards than before and needs more time under full-suite load.
     renderAt('/search?season=summer')
     expect(screen.getAllByRole('link').length).toBeGreaterThan(0)
-  })
+  }, 15000)
 
   it('shows a map with markers when "지도로 보기" is clicked', async () => {
     const user = userEvent.setup()

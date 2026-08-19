@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import segmentTranslations from './segmentTranslations.json'
+import { allSegmentTranslations } from './allSegmentTranslations.js'
 import { mockSegments } from './mockSegments.js'
 
 describe('segmentTranslations', () => {
@@ -7,10 +8,10 @@ describe('segmentTranslations', () => {
     expect(Object.keys(segmentTranslations)).toHaveLength(45)
   })
 
-  it('has a record for every mockSegments entry, keyed by segment_id__segment_id', () => {
+  it('has a record in allSegmentTranslations for every mockSegments entry (45 original + 517 new), keyed by segment_id__segment_id', () => {
     for (const segment of mockSegments) {
       const keyframeId = `${segment.segment_id}__${segment.segment_id}`
-      expect(segmentTranslations[keyframeId], keyframeId).toBeDefined()
+      expect(allSegmentTranslations[keyframeId], keyframeId).toBeDefined()
     }
   })
 
