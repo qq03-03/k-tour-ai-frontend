@@ -32,12 +32,24 @@ const fixtures = [
     scene_elements: ['leaves', 'trail'],
     activity: ['walking'],
   },
+  {
+    segment_id: 'D',
+    season: 'summer',
+    place_name: '충주 중앙탑공원',
+    region: '충청북도',
+    city: '충주시',
+    drama_title: '사랑의 불시착',
+    description: 'A lit bridge at night.',
+    mood: ['peaceful'],
+    scene_elements: ['bridge'],
+    activity: ['walking'],
+  },
 ]
 
 describe('searchSegments', () => {
   it('returns all segments when called with no query or filters', () => {
     const result = searchSegments(fixtures, {})
-    expect(result).toHaveLength(3)
+    expect(result).toHaveLength(4)
   })
 
   it('excludes segments with no matching query terms', () => {
@@ -57,7 +69,14 @@ describe('searchSegments', () => {
 
   it('filters by season', () => {
     const result = searchSegments(fixtures, { season: 'summer' })
-    expect(result.map((s) => s.segment_id)).toEqual(['A', 'B'])
+    expect(result.map((s) => s.segment_id)).toEqual(['A', 'B', 'D'])
+  })
+
+  it('matches on region and city, not just place_name/drama_title/description', () => {
+    const result = searchSegments(fixtures, { query: '충청북도' })
+    expect(result.map((s) => s.segment_id)).toEqual(['D'])
+    const cityResult = searchSegments(fixtures, { query: '충주시' })
+    expect(cityResult.map((s) => s.segment_id)).toEqual(['D'])
   })
 
   it('filters by season when the segment lists multiple comma-separated seasons', () => {
@@ -72,7 +91,7 @@ describe('searchSegments', () => {
 
   it('does not filter by theme when themeKeywords is not provided', () => {
     const result = searchSegments(fixtures, {})
-    expect(result).toHaveLength(3)
+    expect(result).toHaveLength(4)
   })
 
   it('matches nothing when a theme is selected but has no known keywords yet', () => {

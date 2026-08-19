@@ -1,6 +1,8 @@
 function buildSearchText(segment) {
   return [
     segment.place_name,
+    segment.region,
+    segment.city,
     segment.drama_title,
     segment.description,
     ...(segment.mood || []),

@@ -19,4 +19,15 @@ describe('placeCoordinates517', () => {
       expect(typeof coord.longitude, key).toBe('number')
     }
   })
+
+  it('includes a detailed street address for the places that have one (omits the key rather than storing an empty string)', () => {
+    const withAddress = Object.values(placeCoordinates517).filter((c) => 'address' in c)
+    expect(withAddress.length).toBeGreaterThan(0)
+    for (const coord of withAddress) {
+      expect(typeof coord.address).toBe('string')
+      expect(coord.address.length).toBeGreaterThan(0)
+    }
+    const withoutAddress = Object.values(placeCoordinates517).filter((c) => !('address' in c))
+    expect(withAddress.length + withoutAddress.length).toBe(Object.keys(placeCoordinates517).length)
+  })
 })

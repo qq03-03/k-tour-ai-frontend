@@ -66,6 +66,16 @@ describe('Detail', () => {
     expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'))
   })
 
+  it('shows the detailed street address for a place that has one, instead of just the region', () => {
+    renderAt('keyframes_V007_Z7u5SNDq0jw_V007_P031_S002_SCENE_001_jpg')
+    expect(screen.getByText(/충북 충주시 중앙탑면 탑정안길 6/)).toBeInTheDocument()
+  })
+
+  it('falls back to the region when the place has no detailed address', () => {
+    renderAt('keyframes_GOBLIN_01_GOBLIN_01_SCENE_01_jpg')
+    expect(screen.getByText(/강원특별자치도/)).toBeInTheDocument()
+  })
+
   it('derives and links to a play URL for a 517-dataset segment with no videoSources entry', () => {
     renderAt('keyframes_V007_Z7u5SNDq0jw_V007_P031_S002_SCENE_001_jpg')
     const link = screen.getByRole('link', { name: /원본 영상 재생/ })

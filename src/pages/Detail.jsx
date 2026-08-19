@@ -16,6 +16,8 @@ export default function Detail() {
   const { lang, t } = useLanguage()
   const found = mockSegments.find((s) => s.uid === uid)
   const segment = found ? localizeSegment(found, lang) : undefined
+  const placeCoord = segment ? placeCoordinates[segment.place_id] : undefined
+  const locationLabel = placeCoord?.address || segment?.region
   const videoSource = segment ? videoSources[segment.video_id] : undefined
   const videoUrl = videoSource
     ? videoSource.source_url
@@ -42,7 +44,7 @@ export default function Detail() {
       <div style={{ padding: '20px 24px' }}>
         <h2 style={{ margin: 0, fontSize: 19 }}>{segment.place_name}</h2>
         <p style={{ fontSize: 12.5, color: '#64748b', margin: '4px 0 14px' }}>
-          📍 {segment.region} · ⏱ {segment.start_time.toFixed(2)}s–{segment.end_time.toFixed(2)}s
+          📍 {locationLabel} · ⏱ {segment.start_time.toFixed(2)}s–{segment.end_time.toFixed(2)}s
         </p>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
           {segment.mood.slice(0, 3).map((tag) => (
