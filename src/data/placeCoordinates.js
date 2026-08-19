@@ -1,6 +1,8 @@
 // Confirmed coordinates from the team's places_coordinates_final.json
 // (shared via Slack #원천데이터-수집, latest 2026-08-05, all status: "확정").
 // Keyed by place_id so multiple segments at the same place share one pin.
+import { placeCoordinates517 } from './placeCoordinates517.js'
+
 export const placeCoordinates = {
   P001: { place_name: '화성행궁', latitude: 37.2827, longitude: 127.0141 },
   P002: { place_name: '여의도공원 이벤트광장', latitude: 37.528391, longitude: 126.934242 },
@@ -32,4 +34,5 @@ export const placeCoordinates = {
   P028: { place_name: '금능포구', latitude: 33.390083168474966, longitude: 126.22823213867693 },
   P029: { place_name: '경천섬공원', latitude: 36.4399243533953, longitude: 128.259711893989 },
   P030: { place_name: '창경궁', latitude: 37.5776782272, longitude: 126.9938554166 },
+  ...placeCoordinates517,
 }
