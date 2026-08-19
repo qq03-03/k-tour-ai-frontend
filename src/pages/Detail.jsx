@@ -69,7 +69,12 @@ export default function Detail() {
       </div>
       <div className="detail-media-row">
         <div className="detail-media-row__image">
-          <img src={`${import.meta.env.BASE_URL}${segment.keyframe_path}`} alt={segment.place_name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          <img
+            src={`${import.meta.env.BASE_URL}${segment.keyframe_path}`}
+            alt={segment.place_name}
+            onError={(event) => { event.currentTarget.style.visibility = 'hidden' }}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', background: '#e2e8f0' }}
+          />
         </div>
         <div className="detail-media-row__map" style={{ background: '#fff', borderRadius: 16, padding: 16, boxShadow: '0 4px 14px rgba(15,23,42,.05)' }}>
           <h4 style={{ margin: '0 0 10px', fontSize: 13 }}>📍 {t('detail_location_heading')}</h4>

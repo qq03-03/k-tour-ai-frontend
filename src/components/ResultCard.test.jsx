@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect } from 'vitest'
 import ResultCard from './ResultCard.jsx'
@@ -34,5 +34,12 @@ describe('ResultCard', () => {
   it('links to the detail page using the unique uid, not the (possibly duplicated) segment_id', () => {
     render(<MemoryRouter><ResultCard segment={segment} /></MemoryRouter>)
     expect(screen.getByRole('link')).toHaveAttribute('href', '/segment/keyframes_GOBLIN_01_GOBLIN_01_SCENE_01_jpg')
+  })
+
+  it('hides the image without crashing when the keyframe fails to load', () => {
+    render(<MemoryRouter><ResultCard segment={segment} /></MemoryRouter>)
+    const img = screen.getByRole('img')
+    fireEvent.error(img)
+    expect(img.style.visibility).toBe('hidden')
   })
 })

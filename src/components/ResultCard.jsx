@@ -15,7 +15,8 @@ export default function ResultCard({ segment }) {
       <img
         src={`${import.meta.env.BASE_URL}${segment.keyframe_path}`}
         alt={segment.place_name}
-        style={{ width: 96, height: 96, objectFit: 'cover', flexShrink: 0 }}
+        onError={(event) => { event.currentTarget.style.visibility = 'hidden' }}
+        style={{ width: 96, height: 96, objectFit: 'cover', flexShrink: 0, background: '#e2e8f0' }}
       />
       <div style={{ padding: '12px 14px', flex: 1 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -78,5 +78,12 @@ describe('Detail', () => {
     await user.click(screen.getByRole('button', { name: '메뉴' }))
     await user.click(screen.getByRole('button', { name: 'EN' }))
     expect(screen.getByText('Jumunjin Breakwater')).toBeInTheDocument()
+  })
+
+  it('hides the image without crashing when the keyframe fails to load', () => {
+    renderAt('keyframes_GOBLIN_01_GOBLIN_01_SCENE_01_jpg')
+    const img = screen.getByRole('img', { name: '강릉 주문진방파제' })
+    fireEvent.error(img)
+    expect(img.style.visibility).toBe('hidden')
   })
 })

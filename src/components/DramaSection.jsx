@@ -15,7 +15,8 @@ export default function DramaSection() {
           <img
             src={`${import.meta.env.BASE_URL}${drama.keyframe_path}`}
             alt={drama.drama_title}
-            style={{ width: '100%', height: 90, objectFit: 'cover', borderRadius: 16 }}
+            onError={(event) => { event.currentTarget.style.visibility = 'hidden' }}
+            style={{ width: '100%', height: 90, objectFit: 'cover', borderRadius: 16, background: '#e2e8f0' }}
           />
           <p style={{ fontSize: 12.5, margin: '8px 0 0', fontWeight: 600, color: 'var(--color-text)' }}>{drama.drama_title}</p>
         </Link>

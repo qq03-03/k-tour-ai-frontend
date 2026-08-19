@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect } from 'vitest'
 import DramaSection from './DramaSection.jsx'
@@ -18,5 +18,12 @@ describe('DramaSection', () => {
     for (const link of links) {
       expect(link.getAttribute('href')).toMatch(/^\/segment\//)
     }
+  })
+
+  it('hides an image without crashing when the keyframe fails to load', () => {
+    renderWithLanguage(<MemoryRouter><DramaSection /></MemoryRouter>)
+    const [firstImage] = screen.getAllByRole('img')
+    fireEvent.error(firstImage)
+    expect(firstImage.style.visibility).toBe('hidden')
   })
 })
