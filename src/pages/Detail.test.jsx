@@ -66,6 +66,12 @@ describe('Detail', () => {
     expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'))
   })
 
+  it('derives and links to a play URL for a 517-dataset segment with no videoSources entry', () => {
+    renderAt('keyframes_V007_Z7u5SNDq0jw_V007_P031_S002_SCENE_001_jpg')
+    const link = screen.getByRole('link', { name: /원본 영상 재생/ })
+    expect(link).toHaveAttribute('href', 'https://www.youtube.com/watch?v=Z7u5SNDq0jw&t=0s')
+  })
+
   it('shows the place name in English when the language is switched to en', async () => {
     const user = userEvent.setup()
     renderAt('keyframes_GOBLIN_01_GOBLIN_01_SCENE_01_jpg')

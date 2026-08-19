@@ -8,6 +8,7 @@ import { videoSources } from '../data/videoSources.js'
 import { getMapMarkers } from '../lib/getMapMarkers.js'
 import { localizeSegment } from '../lib/localizeSegment.js'
 import { buildVideoUrl } from '../lib/buildVideoUrl.js'
+import { deriveVideoUrlFromVideoId } from '../lib/deriveVideoUrlFromVideoId.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 export default function Detail() {
@@ -16,6 +17,11 @@ export default function Detail() {
   const found = mockSegments.find((s) => s.uid === uid)
   const segment = found ? localizeSegment(found, lang) : undefined
   const videoSource = segment ? videoSources[segment.video_id] : undefined
+  const videoUrl = videoSource
+    ? videoSource.source_url
+    : segment
+      ? deriveVideoUrlFromVideoId(segment.video_id)
+      : undefined
 
   if (!segment) {
     return (
@@ -49,9 +55,9 @@ export default function Detail() {
         <div style={{ background: '#fff', borderRadius: 16, padding: 16, boxShadow: '0 4px 14px rgba(15,23,42,.05)' }}>
           <h4 style={{ margin: '0 0 10px', fontSize: 13 }}>🎬 {t('detail_drama_heading')}</h4>
           <p style={{ margin: 0, fontSize: 13, fontWeight: 700 }}>{segment.drama_title}</p>
-          {videoSource && (
+          {videoUrl && (
             <a
-              href={buildVideoUrl(videoSource.source_url, segment.start_time)}
+              href={buildVideoUrl(videoUrl, segment.start_time)}
               target="_blank"
               rel="noopener noreferrer"
               style={{ display: 'inline-block', marginTop: 12, background: 'var(--color-primary)', color: 'white', borderRadius: 20, padding: '8px 16px', fontSize: 12.5, fontWeight: 700, textDecoration: 'none' }}
