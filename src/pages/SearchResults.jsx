@@ -10,6 +10,7 @@ import { mockSegments } from '../data/mockSegments.js'
 import { themes } from '../data/themes.js'
 import { placeCoordinates } from '../data/placeCoordinates.js'
 import { searchSegments } from '../lib/searchSegments.js'
+import { dedupeByPlace } from '../lib/dedupeByPlace.js'
 import { getMapMarkers } from '../lib/getMapMarkers.js'
 import { localizeSegment } from '../lib/localizeSegment.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
@@ -26,7 +27,8 @@ export default function SearchResults() {
   const themeKeywords = themeId ? themes.find((theme) => theme.id === themeId)?.keywords || [] : null
 
   const results = searchSegments(mockSegments, { query, season, themeKeywords })
-  const localizedResults = results.map((segment) => localizeSegment(segment, lang))
+  const displayResults = season ? dedupeByPlace(results) : results
+  const localizedResults = displayResults.map((segment) => localizeSegment(segment, lang))
 
   function handleSearch(newQuery) {
     navigate(`/search?q=${encodeURIComponent(newQuery)}`)
@@ -39,7 +41,7 @@ export default function SearchResults() {
         <SearchBar initialValue={query} onSearch={handleSearch} />
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 24px' }}>
-        <span style={{ fontSize: 12.5, color: '#64748b' }}>{t('results_count', { n: results.length })}</span>
+        <span style={{ fontSize: 12.5, color: '#64748b' }}>{t('results_count', { n: displayResults.length })}</span>
         <button
           onClick={() => setShowMap((v) => !v)}
           style={{ background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: 20, padding: '8px 16px', fontSize: 12.5, fontWeight: 700 }}
@@ -49,7 +51,7 @@ export default function SearchResults() {
       </div>
       {showMap && (
         <div style={{ margin: '14px 24px' }}>
-          <KakaoMap markers={getMapMarkers(results, placeCoordinates)} />
+          <KakaoMap markers={getMapMarkers(displayResults, placeCoordinates)} />
         </div>
       )}
       <div style={{ padding: '14px 24px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>

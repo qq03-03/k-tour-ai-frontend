@@ -63,6 +63,24 @@ describe('SearchResults', () => {
     expect(screen.getAllByRole('link').length).toBeGreaterThan(0)
   }, 15000)
 
+  it('shows only one card per place when filtering by season, even if the place has many matching segments', () => {
+    // 경복궁 (place_id N-P016) has 27 separate summer-matching segments in the
+    // 517 dataset; without dedup this page would render 27 near-identical cards.
+    renderAt('/search?season=summer')
+    const links = screen.getAllByRole('link')
+    const hrefs = links.map((link) => link.getAttribute('href'))
+    const gyeongbokLinks = hrefs.filter((href) => href.includes('V011_Nba1McqxPEo'))
+    expect(gyeongbokLinks.length).toBeLessThanOrEqual(1)
+  }, 15000)
+
+  it('does not dedupe by place for a plain text search with no season filter', () => {
+    renderAt('/search?q=%EA%B2%BD%EB%B3%B5%EA%B6%81')
+    const links = screen.getAllByRole('link')
+    const hrefs = links.map((link) => link.getAttribute('href'))
+    const gyeongbokLinks = hrefs.filter((href) => href.includes('V011_Nba1McqxPEo'))
+    expect(gyeongbokLinks.length).toBeGreaterThan(1)
+  })
+
   it('shows a map with markers when "지도로 보기" is clicked', async () => {
     const user = userEvent.setup()
     renderAt('/search?q=palace')
