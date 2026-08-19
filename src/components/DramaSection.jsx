@@ -6,7 +6,7 @@ import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 export default function DramaSection() {
   const { lang } = useLanguage()
-  const dramas = getFeaturedDramas(mockSegments).map((segment) => localizeSegment(segment, lang))
+  const dramas = getFeaturedDramas(mockSegments, Infinity).map((segment) => localizeSegment(segment, lang))
 
   return (
     <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 8 }}>

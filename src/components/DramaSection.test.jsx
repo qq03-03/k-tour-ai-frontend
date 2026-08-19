@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect } from 'vitest'
 import DramaSection from './DramaSection.jsx'
+import { mockSegments } from '../data/mockSegments.js'
 import { renderWithLanguage } from '../test-utils.jsx'
 
 describe('DramaSection', () => {
@@ -9,6 +10,13 @@ describe('DramaSection', () => {
     renderWithLanguage(<MemoryRouter><DramaSection /></MemoryRouter>)
     expect(screen.getByText('폭싹 속았수다')).toBeInTheDocument()
     expect(screen.getByText('도깨비')).toBeInTheDocument()
+  })
+
+  it('shows every distinct drama/movie in mockSegments, not just a capped top few', () => {
+    renderWithLanguage(<MemoryRouter><DramaSection /></MemoryRouter>)
+    const uniqueDramaCount = new Set(mockSegments.map((s) => s.drama_title)).size
+    const links = screen.getAllByRole('link')
+    expect(links).toHaveLength(uniqueDramaCount)
   })
 
   it('links each drama to its detail page', () => {

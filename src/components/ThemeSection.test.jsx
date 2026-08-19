@@ -5,10 +5,11 @@ import ThemeSection from './ThemeSection.jsx'
 import { renderWithLanguage } from '../test-utils.jsx'
 
 describe('ThemeSection', () => {
-  it('renders all 6 theme tags in Korean by default, without cafe or food', () => {
+  it('renders all 7 theme tags in Korean by default, without cafe or food', () => {
     renderWithLanguage(<ThemeSection selectedId={null} onSelect={() => {}} />)
     expect(screen.getByText('해변')).toBeInTheDocument()
-    expect(screen.getByText('드라마')).toBeInTheDocument()
+    expect(screen.getByText('전통')).toBeInTheDocument()
+    expect(screen.getByText('들판')).toBeInTheDocument()
     expect(screen.queryByText('카페')).not.toBeInTheDocument()
     expect(screen.queryByText('음식')).not.toBeInTheDocument()
   })

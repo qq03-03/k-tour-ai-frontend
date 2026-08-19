@@ -40,7 +40,7 @@ export default function Home() {
         <ThemeSection selectedId={null} onSelect={handleThemeSelect} />
       </section>
       <section style={{ padding: '28px 24px' }}>
-        <h3 style={{ fontSize: 14, color: '#334155' }}>🔥 {t('home_section_dramas')}</h3>
+        <h3 style={{ fontSize: 14, color: '#334155' }}>🎬 {t('home_section_dramas')}</h3>
         <DramaSection />
       </section>
       <Footer />

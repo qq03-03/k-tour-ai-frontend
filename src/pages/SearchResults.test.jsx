@@ -80,6 +80,21 @@ describe('SearchResults', () => {
     expect(screen.getAllByText(/그 해 우리는/)).toHaveLength(1)
   }, 15000)
 
+  it('shows only one card per place when filtering by theme, even if the place has many matching segments', () => {
+    // 경복궁 (place_id N-P016) has 22 separate segments matching the drama theme.
+    renderAt('/search?theme=traditional')
+    const links = screen.getAllByRole('link')
+    const hrefs = links.map((link) => link.getAttribute('href'))
+    const gyeongbokLinks = hrefs.filter((href) => href.includes('V011_yZeNfaIK7Nw'))
+    expect(gyeongbokLinks.length).toBeLessThanOrEqual(1)
+  }, 15000)
+
+  it('shows only one card per drama when filtering by theme, even if the drama was filmed at several different places', () => {
+    // 그 해 우리는 matches the drama theme at 4 different places.
+    renderAt('/search?theme=traditional')
+    expect(screen.getAllByText(/그 해 우리는/)).toHaveLength(1)
+  }, 15000)
+
   it('does not dedupe by place for a plain text search with no season filter', () => {
     renderAt('/search?q=%EA%B2%BD%EB%B3%B5%EA%B6%81')
     const links = screen.getAllByRole('link')

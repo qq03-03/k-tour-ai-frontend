@@ -28,7 +28,8 @@ export default function SearchResults() {
   const themeKeywords = themeId ? themes.find((theme) => theme.id === themeId)?.keywords || [] : null
 
   const results = searchSegments(mockSegments, { query, season, themeKeywords })
-  const displayResults = season ? dedupeByDrama(dedupeByPlace(results)) : results
+  const isBrowsing = Boolean(season || themeId)
+  const displayResults = isBrowsing ? dedupeByDrama(dedupeByPlace(results)) : results
   const localizedResults = displayResults.map((segment) => localizeSegment(segment, lang))
 
   function handleSearch(newQuery) {
