@@ -7,6 +7,8 @@
 // segment_id is unique in this final dataset (unlike the earlier metadata2.1.json
 // draft), but `uid` (derived from keyframe_path) is still used for React keys and
 // detail routing for consistency with the rest of the codebase.
+import { rawSegments517 } from './mockSegments517.js'
+
 const rawSegments = [
   {
     "segment_id": "WLGYT_01_SCENE_01",
@@ -1501,7 +1503,7 @@ const rawSegments = [
 // data/seasons.js and lib/searchSegments.js's season filter (1:1, lossless mapping).
 const SEASON_KO_TO_EN = { 봄: 'spring', 여름: 'summer', 가을: 'autumn', 겨울: 'winter' }
 
-export const mockSegments = rawSegments.map((segment) => ({
+export const mockSegments = [...rawSegments, ...rawSegments517].map((segment) => ({
   ...segment,
   season: SEASON_KO_TO_EN[segment.season] || segment.season,
   uid: segment.keyframe_path.replace(/[^a-zA-Z0-9]/g, '_'),
