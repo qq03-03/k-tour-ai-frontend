@@ -11,6 +11,7 @@ import { themes } from '../data/themes.js'
 import { placeCoordinates } from '../data/placeCoordinates.js'
 import { searchSegments } from '../lib/searchSegments.js'
 import { dedupeByPlace } from '../lib/dedupeByPlace.js'
+import { dedupeByDrama } from '../lib/dedupeByDrama.js'
 import { getMapMarkers } from '../lib/getMapMarkers.js'
 import { localizeSegment } from '../lib/localizeSegment.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
@@ -27,7 +28,7 @@ export default function SearchResults() {
   const themeKeywords = themeId ? themes.find((theme) => theme.id === themeId)?.keywords || [] : null
 
   const results = searchSegments(mockSegments, { query, season, themeKeywords })
-  const displayResults = season ? dedupeByPlace(results) : results
+  const displayResults = season ? dedupeByDrama(dedupeByPlace(results)) : results
   const localizedResults = displayResults.map((segment) => localizeSegment(segment, lang))
 
   function handleSearch(newQuery) {

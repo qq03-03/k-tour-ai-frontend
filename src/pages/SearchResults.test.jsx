@@ -73,6 +73,13 @@ describe('SearchResults', () => {
     expect(gyeongbokLinks.length).toBeLessThanOrEqual(1)
   }, 15000)
 
+  it('shows only one card per drama when filtering by season, even if the drama was filmed at several different places', () => {
+    // 그 해 우리는 has summer-tagged segments at 3 different places (P001,
+    // N-P005, N-P001); deduping by place alone still leaves 3 cards for it.
+    renderAt('/search?season=summer')
+    expect(screen.getAllByText(/그 해 우리는/)).toHaveLength(1)
+  }, 15000)
+
   it('does not dedupe by place for a plain text search with no season filter', () => {
     renderAt('/search?q=%EA%B2%BD%EB%B3%B5%EA%B6%81')
     const links = screen.getAllByRole('link')
