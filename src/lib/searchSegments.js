@@ -1,4 +1,10 @@
+import { regionAliases } from '../data/regionAliases.js'
+
 function buildSearchText(segment) {
+  const matchingAliasTerms = regionAliases
+    .filter((group) => group.regions.includes(segment.region))
+    .flatMap((group) => group.terms)
+
   return [
     segment.place_name,
     segment.region,
@@ -8,6 +14,7 @@ function buildSearchText(segment) {
     ...(segment.mood || []),
     ...(segment.scene_elements || []),
     ...(segment.activity || []),
+    ...matchingAliasTerms,
   ]
     .join(' ')
     .toLowerCase()

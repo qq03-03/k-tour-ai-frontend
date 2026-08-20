@@ -79,6 +79,13 @@ describe('searchSegments', () => {
     expect(cityResult.map((s) => s.segment_id)).toEqual(['D'])
   })
 
+  it('matches a broader colloquial region group (e.g. 충청도/충청권) against a segment\'s specific region', () => {
+    const provinceResult = searchSegments(fixtures, { query: '충청도' })
+    expect(provinceResult.map((s) => s.segment_id)).toEqual(['D'])
+    const districtResult = searchSegments(fixtures, { query: '충청권' })
+    expect(districtResult.map((s) => s.segment_id)).toEqual(['D'])
+  })
+
   it('filters by season when the segment lists multiple comma-separated seasons', () => {
     const result = searchSegments(fixtures, { season: 'winter' })
     expect(result.map((s) => s.segment_id)).toEqual(['C'])
