@@ -4,7 +4,6 @@ import Footer from '../components/Footer.jsx'
 import KakaoMap from '../components/KakaoMap.jsx'
 import { mockSegments } from '../data/mockSegments.js'
 import { placeCoordinates } from '../data/placeCoordinates.js'
-import { videoSources } from '../data/videoSources.js'
 import { getMapMarkers } from '../lib/getMapMarkers.js'
 import { localizeSegment } from '../lib/localizeSegment.js'
 import { buildVideoUrl } from '../lib/buildVideoUrl.js'
@@ -18,12 +17,7 @@ export default function Detail() {
   const segment = found ? localizeSegment(found, lang) : undefined
   const placeCoord = segment ? placeCoordinates[segment.place_id] : undefined
   const locationLabel = placeCoord?.address || segment?.region
-  const videoSource = segment ? videoSources[segment.video_id] : undefined
-  const videoUrl = videoSource
-    ? videoSource.source_url
-    : segment
-      ? deriveVideoUrlFromVideoId(segment.video_id)
-      : undefined
+  const videoUrl = segment ? deriveVideoUrlFromVideoId(segment.video_id) : undefined
 
   if (!segment) {
     return (

@@ -42,13 +42,13 @@ describe('Detail', () => {
   })
 
   it('renders the place name and drama title for a known segment', () => {
-    renderAt('keyframes_GOBLIN_01_GOBLIN_01_SCENE_01_jpg')
-    expect(screen.getByText('강릉 주문진방파제')).toBeInTheDocument()
-    expect(screen.getByText('도깨비')).toBeInTheDocument()
+    renderAt('keyframes_V007_Z7u5SNDq0jw_V007_P031_S002_SCENE_001_jpg')
+    expect(screen.getByText('충주 중앙탑공원')).toBeInTheDocument()
+    expect(screen.getByText('사랑의 불시착')).toBeInTheDocument()
   })
 
   it('renders a map marker for the segment\'s place', async () => {
-    renderAt('keyframes_GOBLIN_01_GOBLIN_01_SCENE_01_jpg')
+    renderAt('keyframes_V007_Z7u5SNDq0jw_V007_P031_S002_SCENE_001_jpg')
     await new Promise((resolve) => setTimeout(resolve, 0))
     expect(window.kakao.maps.Marker).toHaveBeenCalledTimes(1)
   })
@@ -58,10 +58,10 @@ describe('Detail', () => {
     expect(screen.getByText(/찾을 수 없어요/)).toBeInTheDocument()
   })
 
-  it('links to the original video source for the segment', () => {
-    renderAt('keyframes_GOBLIN_01_GOBLIN_01_SCENE_01_jpg')
+  it('derives and links to the original YouTube video from the segment\'s video_id', () => {
+    renderAt('keyframes_V007_Z7u5SNDq0jw_V007_P031_S002_SCENE_001_jpg')
     const link = screen.getByRole('link', { name: /원본 영상 재생/ })
-    expect(link).toHaveAttribute('href', 'https://www.youtube.com/watch?v=mCeMgl6rR-U&t=202s')
+    expect(link).toHaveAttribute('href', 'https://www.youtube.com/watch?v=Z7u5SNDq0jw&t=0s')
     expect(link).toHaveAttribute('target', '_blank')
     expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'))
   })
@@ -72,27 +72,21 @@ describe('Detail', () => {
   })
 
   it('falls back to the region when the place has no detailed address', () => {
-    renderAt('keyframes_GOBLIN_01_GOBLIN_01_SCENE_01_jpg')
-    expect(screen.getByText(/강원특별자치도/)).toBeInTheDocument()
-  })
-
-  it('derives and links to a play URL for a 517-dataset segment with no videoSources entry', () => {
-    renderAt('keyframes_V007_Z7u5SNDq0jw_V007_P031_S002_SCENE_001_jpg')
-    const link = screen.getByRole('link', { name: /원본 영상 재생/ })
-    expect(link).toHaveAttribute('href', 'https://www.youtube.com/watch?v=Z7u5SNDq0jw&t=0s')
+    renderAt('keyframes_V001_nypQChEVN0c_V001_P001_S001_SCENE_001_jpg')
+    expect(screen.getByText(/경기도/)).toBeInTheDocument()
   })
 
   it('shows the place name in English when the language is switched to en', async () => {
     const user = userEvent.setup()
-    renderAt('keyframes_GOBLIN_01_GOBLIN_01_SCENE_01_jpg')
+    renderAt('keyframes_V007_Z7u5SNDq0jw_V007_P031_S002_SCENE_001_jpg')
     await user.click(screen.getByRole('button', { name: '메뉴' }))
     await user.click(screen.getByRole('button', { name: 'EN' }))
-    expect(screen.getByText('Jumunjin Breakwater')).toBeInTheDocument()
+    expect(screen.getByText('Chungju Jungangtap Park')).toBeInTheDocument()
   })
 
   it('hides the image without crashing when the keyframe fails to load', () => {
-    renderAt('keyframes_GOBLIN_01_GOBLIN_01_SCENE_01_jpg')
-    const img = screen.getByRole('img', { name: '강릉 주문진방파제' })
+    renderAt('keyframes_V007_Z7u5SNDq0jw_V007_P031_S002_SCENE_001_jpg')
+    const img = screen.getByRole('img', { name: '충주 중앙탑공원' })
     fireEvent.error(img)
     expect(img.style.visibility).toBe('hidden')
   })

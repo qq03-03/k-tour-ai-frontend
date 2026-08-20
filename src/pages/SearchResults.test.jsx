@@ -42,10 +42,6 @@ describe('SearchResults', () => {
   })
 
   it('shows matching results for a query present in the real mock data', () => {
-    // 고창 학원농장 now matches twice: once from the original 45-segment dataset
-    // (real image) and once from the 517-segment dataset (namespaced place_id,
-    // no image yet) -- this duplication is expected, see
-    // docs/superpowers/specs/2026-08-19-517-segment-dataset-integration-design.md.
     renderAt('/search?q=canola')
     expect(screen.getAllByText('고창 학원농장').length).toBeGreaterThan(0)
   })
@@ -56,9 +52,9 @@ describe('SearchResults', () => {
   })
 
   it('filters by season from the URL', () => {
-    // 284 of the 562 total segments match season=summer after the 517-segment
-    // dataset was added (vs. a handful out of 45 before), so this renders far
-    // more ResultCards than before and needs more time under full-suite load.
+    // 284 of the 517 total segments match season=summer, so this renders far
+    // more ResultCards than the empty-query default and needs more time
+    // under full-suite load.
     renderAt('/search?season=summer')
     expect(screen.getAllByRole('link').length).toBeGreaterThan(0)
   }, 15000)
@@ -116,6 +112,6 @@ describe('SearchResults', () => {
     renderAt('/search?q=canola')
     await user.click(screen.getByRole('button', { name: '메뉴' }))
     await user.click(screen.getByRole('button', { name: 'EN' }))
-    expect(await screen.findByText('Hagwon Tourist Farm')).toBeInTheDocument()
+    expect(await screen.findByText('Gochang Hakwon Farm')).toBeInTheDocument()
   })
 })

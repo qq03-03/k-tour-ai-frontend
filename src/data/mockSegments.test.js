@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { mockSegments } from './mockSegments.js'
 
 describe('mockSegments', () => {
-  it('has exactly 562 entries', () => {
-    expect(mockSegments).toHaveLength(562)
+  it('has exactly 517 entries', () => {
+    expect(mockSegments).toHaveLength(517)
   })
 
   it('has unique uid values', () => {

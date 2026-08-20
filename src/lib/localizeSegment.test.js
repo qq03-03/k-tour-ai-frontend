@@ -2,12 +2,12 @@ import { describe, it, expect } from 'vitest'
 import { localizeSegment } from './localizeSegment.js'
 import { mockSegments } from '../data/mockSegments.js'
 
-const sample = mockSegments.find((s) => s.segment_id === 'GOBLIN_01_SCENE_01')
+const sample = mockSegments.find((s) => s.segment_id === 'V007_P031_S002_SCENE_001')
 
 describe('localizeSegment', () => {
   it('replaces localizable fields with the requested language', () => {
     const result = localizeSegment(sample, 'en')
-    expect(result.drama_title).toBe('Guardian: The Lonely and Great God')
+    expect(result.drama_title).toBe('Crash Landing on You')
     expect(result.place_name).not.toBe(sample.place_name)
   })
 

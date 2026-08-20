@@ -1,11 +1,11 @@
-import { allSegmentTranslations } from '../data/allSegmentTranslations.js'
+import segmentTranslations517 from '../data/segmentTranslations517.json'
 
 const LOCALIZABLE_FIELDS = [
   'drama_title', 'place_name', 'region', 'season', 'time_of_day',
   'description', 'mood', 'activity', 'scene_elements',
 ]
 
-export function localizeSegment(segment, lang, translations = allSegmentTranslations) {
+export function localizeSegment(segment, lang, translations = segmentTranslations517) {
   const keyframeId = `${segment.segment_id}__${segment.segment_id}`
   const record = translations[keyframeId]
   const localized = record?.[lang] ?? record?.ko
