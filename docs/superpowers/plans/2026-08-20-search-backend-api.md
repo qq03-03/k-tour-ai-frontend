@@ -73,24 +73,25 @@ Expected: top commit is the merge commit (or a fast-forward to `feature/search-c
 ### Task 2: Fix `list_segments()` to read the real 517-dataset columns
 
 **Files:**
+- Create: `search-service/src/segment_row.py`
 - Modify: `search-service/src/clip_backend.py` (the `PgVectorRepository.list_segments()` query and `_segment_from_row()` method)
+- Test: `search-service/tests/test_segment_row.py`
 - Test: `search-service/tests/test_clip_backend.py`
 
 **Interfaces:**
 - Consumes: none new.
-- Produces: `PgVectorRepository.list_segments()` returns dicts with keys `segment_id, source_segment_id, video_id, place_id, place_name, region, city, drama_title, start_time, end_time, description, season, time_of_day, keyframe_path, mood, activity, scene_elements, k_culture_elements` — used by every later task that reads segment data.
+- Produces: `segment_from_row(row: Sequence[Any]) -> dict[str, Any]` in `search-service/src/segment_row.py`, converting a `video_segments` row (in the fixed column order `segment_id, source_segment_id, video_id, place_id, place_name, region, city, drama_title, start_time, end_time, caption, season, time_of_day, keyframe_path, mood_tags, activity_tags, scene_elements, k_culture_elements`) into a dict with keys `segment_id, source_segment_id, video_id, place_id, place_name, region, city, drama_title, start_time, end_time, description, season, time_of_day, keyframe_path, mood, activity, scene_elements, k_culture_elements`. Used by `PgVectorRepository.list_segments()` in this task and by `SegmentsRepository` in Task 8 — both query `video_segments` for the exact same 18 columns in this exact order, so both share this one row-mapping function instead of each defining their own.
 
 **Why this is needed:** `list_segments()` as merged in Task 1 was written for an earlier prototype schema — it reads `place_name`/`description`/`drama_title`/etc. out of a JSONB `metadata` column. The real 517-segment data (loaded by `embedding-db/scripts/insert_embeddings.py`, already verified against `main`) writes these into dedicated `video_segments` columns instead (`place_id`, `place_name`, `region`, `city`, `drama_title`, `season`, `time_of_day`, `caption` for description, `activity_tags`, `scene_elements`, `k_culture_elements`, `source_segment_id`). Without this fix, `list_segments()` would return empty/wrong values for real data.
 
-- [ ] **Step 1: Read the current test file to see existing test patterns**
+- [ ] **Step 1: Write the failing test for the shared row-mapping function**
 
-Run: `cat search-service/tests/test_clip_backend.py | head -60` and confirm how existing tests fake a DB cursor/connection (they use a fake `psycopg.connect` via `monkeypatch` — follow the same pattern for the new test below, matching whatever fixture helper that file already defines).
-
-- [ ] **Step 2: Write the failing test**
-
-Add to `search-service/tests/test_clip_backend.py` (adapt the exact fake-connection helper name to whatever the file already uses — do not invent a second one):
+Create `search-service/tests/test_segment_row.py`:
 
 ```python
+from src.segment_row import segment_from_row
+
+
 def test_segment_from_row_reads_the_517_dataset_columns():
     row = (
         "V007_P031_S002_SCENE_001",   # segment_id
@@ -112,7 +113,7 @@ def test_segment_from_row_reads_the_517_dataset_columns():
         ["bridge", "water", "lights"],             # scene_elements
         ["K드라마성지"],                            # k_culture_elements
     )
-    segment = PgVectorRepository._segment_from_row(row)
+    segment = segment_from_row(row)
     assert segment["segment_id"] == "V007_P031_S002_SCENE_001"
     assert segment["source_segment_id"] == "V007_P031_S002"
     assert segment["place_id"] == "P031"
@@ -129,14 +130,115 @@ def test_segment_from_row_reads_the_517_dataset_columns():
     assert segment["k_culture_elements"] == ["K드라마성지"]
 ```
 
-- [ ] **Step 3: Run the test to verify it fails**
+- [ ] **Step 2: Run the test to verify it fails**
 
-Run: `cd search-service && python -m pytest tests/test_clip_backend.py::test_segment_from_row_reads_the_517_dataset_columns -v`
-Expected: FAIL — `KeyError: 'source_segment_id'` or an `AssertionError` on the first new field, since the current `_segment_from_row` doesn't populate these keys this way.
+Run: `cd search-service && python -m pytest tests/test_segment_row.py -v`
+Expected: FAIL — `ModuleNotFoundError: No module named 'src.segment_row'`.
 
-- [ ] **Step 4: Rewrite `list_segments()` and `_segment_from_row()`**
+- [ ] **Step 3: Write the shared row-mapping function**
 
-In `search-service/src/clip_backend.py`, replace the `list_segments` method body:
+Create `search-service/src/segment_row.py`:
+
+```python
+from collections.abc import Sequence
+from typing import Any
+
+
+def segment_from_row(row: Sequence[Any]) -> dict[str, Any]:
+    """Maps a video_segments row to a segment dict.
+
+    Expects columns in exactly this order: segment_id, source_segment_id,
+    video_id, place_id, place_name, region, city, drama_title, start_time,
+    end_time, caption, season, time_of_day, keyframe_path, mood_tags,
+    activity_tags, scene_elements, k_culture_elements.
+    """
+    return {
+        "segment_id": row[0],
+        "source_segment_id": row[1],
+        "video_id": row[2],
+        "place_id": row[3],
+        "place_name": row[4],
+        "region": row[5],
+        "city": row[6],
+        "drama_title": row[7],
+        "start_time": float(row[8]),
+        "end_time": float(row[9]),
+        "description": row[10],
+        "season": row[11],
+        "time_of_day": row[12],
+        "keyframe_path": row[13],
+        "mood": list(row[14] or []),
+        "activity": list(row[15] or []),
+        "scene_elements": list(row[16] or []),
+        "k_culture_elements": list(row[17] or []),
+    }
+```
+
+- [ ] **Step 4: Run the test to verify it passes**
+
+Run: `cd search-service && python -m pytest tests/test_segment_row.py -v`
+Expected: PASS
+
+- [ ] **Step 5: Write the failing test for `list_segments()` using the shared function**
+
+Run: `cat search-service/tests/test_clip_backend.py | head -60` first, to confirm how existing tests fake a DB cursor/connection (they use a fake `psycopg.connect` via `monkeypatch` — follow the same pattern below, matching whatever fixture helper that file already defines; do not invent a second one).
+
+Add to `search-service/tests/test_clip_backend.py`:
+
+```python
+def test_list_segments_uses_the_517_dataset_columns(monkeypatch):
+    row = (
+        "V007_P031_S002_SCENE_001", "V007_P031_S002", "V007_Z7u5SNDq0jw",
+        "P031", "충주 중앙탑공원", "충청북도", "충주시", "사랑의 불시착",
+        0.0, 3.75, "야경", "summer", "night", "keyframes/x.jpg",
+        ["peaceful"], ["walking"], ["bridge"], ["K드라마성지"],
+    )
+    # Use this file's existing fake-connection pattern here to make
+    # psycopg.connect(...) return a fake connection whose cursor's
+    # fetchall() returns [row]. Name the helper the same way the rest of
+    # this file already does.
+    repository = PgVectorRepository(DatabaseConfig("fake-connection-string"))
+
+    segments = repository.list_segments()
+
+    assert segments == [
+        {
+            "segment_id": "V007_P031_S002_SCENE_001",
+            "source_segment_id": "V007_P031_S002",
+            "video_id": "V007_Z7u5SNDq0jw",
+            "place_id": "P031",
+            "place_name": "충주 중앙탑공원",
+            "region": "충청북도",
+            "city": "충주시",
+            "drama_title": "사랑의 불시착",
+            "start_time": 0.0,
+            "end_time": 3.75,
+            "description": "야경",
+            "season": "summer",
+            "time_of_day": "night",
+            "keyframe_path": "keyframes/x.jpg",
+            "mood": ["peaceful"],
+            "activity": ["walking"],
+            "scene_elements": ["bridge"],
+            "k_culture_elements": ["K드라마성지"],
+        }
+    ]
+```
+
+- [ ] **Step 6: Run the test to verify it fails**
+
+Run: `cd search-service && python -m pytest tests/test_clip_backend.py::test_list_segments_uses_the_517_dataset_columns -v`
+Expected: FAIL — either an import/setup error from the fake-connection wiring, or an assertion mismatch, since `list_segments()` still queries the old columns.
+
+- [ ] **Step 7: Rewrite `list_segments()` to use the shared function**
+
+In `search-service/src/clip_backend.py`, add the import at the top:
+
+```python
+from .segment_row import segment_from_row
+```
+
+Replace the `list_segments` method body:
 
 ```python
     def list_segments(self) -> list[dict[str, Any]]:
@@ -156,52 +258,25 @@ In `search-service/src/clip_backend.py`, replace the `list_segments` method body
             with connection.cursor() as cursor:
                 cursor.execute(query)
                 rows = cursor.fetchall()
-        return [self._segment_from_row(row) for row in rows]
+        return [segment_from_row(row) for row in rows]
 ```
 
-Replace the `_segment_from_row` static method:
+Delete the `_segment_from_row` static method entirely (replaced by the shared `segment_from_row` function). Delete the now-unused `_PLACE_REGION_FALLBACKS`, `_SEASON_CANONICAL`, `_TIME_CANONICAL` module-level dicts and the `_canonical_scalar` function if nothing else in the file references them (check with `grep -n "_PLACE_REGION_FALLBACKS\|_SEASON_CANONICAL\|_TIME_CANONICAL\|_canonical_scalar" search-service/src/clip_backend.py` — if any of the four names appear anywhere outside the definitions you're removing, keep that one and only delete the others).
 
-```python
-    @staticmethod
-    def _segment_from_row(row: Sequence[Any]) -> dict[str, Any]:
-        return {
-            "segment_id": row[0],
-            "source_segment_id": row[1],
-            "video_id": row[2],
-            "place_id": row[3],
-            "place_name": row[4],
-            "region": row[5],
-            "city": row[6],
-            "drama_title": row[7],
-            "start_time": float(row[8]),
-            "end_time": float(row[9]),
-            "description": row[10],
-            "season": row[11],
-            "time_of_day": row[12],
-            "keyframe_path": row[13],
-            "mood": list(row[14] or []),
-            "activity": list(row[15] or []),
-            "scene_elements": list(row[16] or []),
-            "k_culture_elements": list(row[17] or []),
-        }
-```
+- [ ] **Step 8: Run the test to verify it passes**
 
-Delete the now-unused `_PLACE_REGION_FALLBACKS`, `_SEASON_CANONICAL`, `_TIME_CANONICAL` module-level dicts and the `_canonical_scalar` function if nothing else in the file references them (check with `grep -n "_PLACE_REGION_FALLBACKS\|_SEASON_CANONICAL\|_TIME_CANONICAL\|_canonical_scalar" search-service/src/clip_backend.py` — if any of the four names appear anywhere outside the definitions you're removing, keep that one and only delete the others).
-
-- [ ] **Step 5: Run the test to verify it passes**
-
-Run: `cd search-service && python -m pytest tests/test_clip_backend.py::test_segment_from_row_reads_the_517_dataset_columns -v`
+Run: `cd search-service && python -m pytest tests/test_clip_backend.py::test_list_segments_uses_the_517_dataset_columns -v`
 Expected: PASS
 
-- [ ] **Step 6: Run the full search-service test suite to check for regressions**
+- [ ] **Step 9: Run the full search-service test suite to check for regressions**
 
 Run: `cd search-service && python -m pytest -q`
-Expected: all tests pass except possibly other tests in `test_clip_backend.py` that asserted the *old* row shape/field names (e.g. `spot_name`, `landscape`, `category`, `start_sec`/`end_sec`) — if any fail for that reason, update those specific assertions to match the new field set the same way Step 2's test does; do not weaken assertions elsewhere to make unrelated failures disappear.
+Expected: all tests pass except possibly other tests in `test_clip_backend.py` that asserted the *old* row shape/field names (e.g. `spot_name`, `landscape`, `category`, `start_sec`/`end_sec`) — if any fail for that reason, update those specific assertions to match the new field set the same way Step 5's test does; do not weaken assertions elsewhere to make unrelated failures disappear.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 10: Commit**
 
 ```bash
-git add search-service/src/clip_backend.py search-service/tests/test_clip_backend.py
+git add search-service/src/segment_row.py search-service/src/clip_backend.py search-service/tests/test_segment_row.py search-service/tests/test_clip_backend.py
 git commit -m "Read segment metadata from dedicated columns, matching the real 517-dataset schema"
 ```
 
@@ -1314,6 +1389,8 @@ Create `search-service/app/segments_repository.py`:
 from collections.abc import Callable
 from typing import Any
 
+from src.segment_row import segment_from_row
+
 _COLUMNS = """
     vs.segment_id, vs.source_segment_id, vs.video_id,
     vs.place_id, vs.place_name, vs.region, vs.city,
@@ -1346,7 +1423,7 @@ class SegmentsRepository:
             with connection.cursor() as cursor:
                 cursor.execute(query, params)
                 rows = cursor.fetchall()
-        return [self._segment_from_row(row) for row in rows]
+        return [segment_from_row(row) for row in rows]
 
     def get_segment(self, segment_id: str) -> dict[str, Any] | None:
         query = f"SELECT {_COLUMNS} FROM video_segments AS vs WHERE vs.segment_id = %s"
@@ -1354,31 +1431,10 @@ class SegmentsRepository:
             with connection.cursor() as cursor:
                 cursor.execute(query, (segment_id,))
                 row = cursor.fetchone()
-        return self._segment_from_row(row) if row else None
-
-    @staticmethod
-    def _segment_from_row(row) -> dict[str, Any]:
-        return {
-            "segment_id": row[0],
-            "source_segment_id": row[1],
-            "video_id": row[2],
-            "place_id": row[3],
-            "place_name": row[4],
-            "region": row[5],
-            "city": row[6],
-            "drama_title": row[7],
-            "start_time": float(row[8]),
-            "end_time": float(row[9]),
-            "description": row[10],
-            "season": row[11],
-            "time_of_day": row[12],
-            "keyframe_path": row[13],
-            "mood": list(row[14] or []),
-            "activity": list(row[15] or []),
-            "scene_elements": list(row[16] or []),
-            "k_culture_elements": list(row[17] or []),
-        }
+        return segment_from_row(row) if row else None
 ```
+
+This reuses the same `segment_from_row` function Task 2 introduced in `search-service/src/segment_row.py` — the column order in `_COLUMNS` above matches its expected order exactly, so no separate mapping code is needed here.
 
 - [ ] **Step 4: Run the test to verify it passes**
 
