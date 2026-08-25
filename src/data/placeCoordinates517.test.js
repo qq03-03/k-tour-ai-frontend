@@ -6,9 +6,10 @@ describe('placeCoordinates517', () => {
     expect(Object.keys(placeCoordinates517)).toHaveLength(74)
   })
 
-  it('prefixes every key with N-', () => {
+  it('keys every entry by the real backend place_id, unprefixed', () => {
     for (const key of Object.keys(placeCoordinates517)) {
-      expect(key.startsWith('N-'), key).toBe(true)
+      expect(key.startsWith('N-'), key).toBe(false)
+      expect(key, key).toMatch(/^P\d+$/)
     }
   })
 

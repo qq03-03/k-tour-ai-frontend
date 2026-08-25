@@ -30,7 +30,7 @@ function makeSegment(overrides = {}) {
     uid: 'V007_P031_S002_SCENE_001',
     segment_id: 'V007_P031_S002_SCENE_001',
     video_id: 'V007_Z7u5SNDq0jw',
-    place_id: 'N-P031',
+    place_id: 'P031',
     place_name: '충주 중앙탑공원',
     region: '충청북도',
     city: '충주시',
@@ -48,14 +48,14 @@ function makeSegment(overrides = {}) {
   }
 }
 
-// A second real segment whose place (N-P001) has no `address` entry in
+// A second real segment whose place (P001) has no `address` entry in
 // placeCoordinates517.js, so the location label falls back to `region`.
 function makeSegmentWithoutAddress(overrides = {}) {
   return {
     uid: 'V001_P001_S001_SCENE_001',
     segment_id: 'V001_P001_S001_SCENE_001',
     video_id: 'V001_nypQChEVN0c',
-    place_id: 'N-P001',
+    place_id: 'P001',
     place_name: '수원 화성',
     region: '경기도',
     city: '수원시',

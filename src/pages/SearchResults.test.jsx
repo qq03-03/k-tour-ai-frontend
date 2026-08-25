@@ -35,7 +35,7 @@ function makeSegment(overrides = {}) {
     uid: 'V900_P900_S001_SCENE_001',
     segment_id: 'V900_P900_S001_SCENE_001',
     video_id: 'V900_testvideo',
-    place_id: 'N-P900',
+    place_id: 'P900',
     place_name: '테스트 장소',
     region: '서울특별시',
     city: '종로구',
@@ -129,7 +129,7 @@ describe('SearchResults', () => {
   })
 
   it('filters by season from the URL and sends the season filter to the API', async () => {
-    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([makeSegment({ place_id: 'N-P001' })])
+    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([makeSegment({ place_id: 'P001' })])
 
     renderAt('/search?season=summer')
 
@@ -142,9 +142,9 @@ describe('SearchResults', () => {
 
   it('shows only one card per place when filtering by season, even if the place has many matching segments', async () => {
     vi.mocked(searchSegmentsApi).mockResolvedValueOnce([
-      makeSegment({ uid: 'a', segment_id: 'a', place_id: 'N-P001' }),
-      makeSegment({ uid: 'b', segment_id: 'b', place_id: 'N-P001' }),
-      makeSegment({ uid: 'c', segment_id: 'c', place_id: 'N-P001' }),
+      makeSegment({ uid: 'a', segment_id: 'a', place_id: 'P001' }),
+      makeSegment({ uid: 'b', segment_id: 'b', place_id: 'P001' }),
+      makeSegment({ uid: 'c', segment_id: 'c', place_id: 'P001' }),
     ])
 
     renderAt('/search?season=summer')
@@ -155,9 +155,9 @@ describe('SearchResults', () => {
 
   it('shows only one card per drama when filtering by season, even if the drama was filmed at several different places', async () => {
     vi.mocked(searchSegmentsApi).mockResolvedValueOnce([
-      makeSegment({ uid: 'a', segment_id: 'a', place_id: 'N-P001', drama_title: '그 해 우리는' }),
-      makeSegment({ uid: 'b', segment_id: 'b', place_id: 'N-P002', drama_title: '그 해 우리는' }),
-      makeSegment({ uid: 'c', segment_id: 'c', place_id: 'N-P003', drama_title: '그 해 우리는' }),
+      makeSegment({ uid: 'a', segment_id: 'a', place_id: 'P001', drama_title: '그 해 우리는' }),
+      makeSegment({ uid: 'b', segment_id: 'b', place_id: 'P002', drama_title: '그 해 우리는' }),
+      makeSegment({ uid: 'c', segment_id: 'c', place_id: 'P003', drama_title: '그 해 우리는' }),
     ])
 
     renderAt('/search?season=summer')
@@ -169,8 +169,8 @@ describe('SearchResults', () => {
 
   it('shows only one card per place when filtering by theme, even if the place has many matching segments', async () => {
     vi.mocked(searchSegmentsApi).mockResolvedValueOnce([
-      makeSegment({ uid: 'a', segment_id: 'a', place_id: 'N-P001' }),
-      makeSegment({ uid: 'b', segment_id: 'b', place_id: 'N-P001' }),
+      makeSegment({ uid: 'a', segment_id: 'a', place_id: 'P001' }),
+      makeSegment({ uid: 'b', segment_id: 'b', place_id: 'P001' }),
     ])
 
     renderAt('/search?theme=traditional')
@@ -185,10 +185,10 @@ describe('SearchResults', () => {
 
   it('shows only one card per drama when filtering by theme, even if the drama was filmed at several different places', async () => {
     vi.mocked(searchSegmentsApi).mockResolvedValueOnce([
-      makeSegment({ uid: 'a', segment_id: 'a', place_id: 'N-P001', drama_title: '그 해 우리는' }),
-      makeSegment({ uid: 'b', segment_id: 'b', place_id: 'N-P002', drama_title: '그 해 우리는' }),
-      makeSegment({ uid: 'c', segment_id: 'c', place_id: 'N-P003', drama_title: '그 해 우리는' }),
-      makeSegment({ uid: 'd', segment_id: 'd', place_id: 'N-P004', drama_title: '그 해 우리는' }),
+      makeSegment({ uid: 'a', segment_id: 'a', place_id: 'P001', drama_title: '그 해 우리는' }),
+      makeSegment({ uid: 'b', segment_id: 'b', place_id: 'P002', drama_title: '그 해 우리는' }),
+      makeSegment({ uid: 'c', segment_id: 'c', place_id: 'P003', drama_title: '그 해 우리는' }),
+      makeSegment({ uid: 'd', segment_id: 'd', place_id: 'P004', drama_title: '그 해 우리는' }),
     ])
 
     renderAt('/search?theme=traditional')
@@ -207,8 +207,8 @@ describe('SearchResults', () => {
 
   it('does not dedupe by place for a plain text search with no season filter', async () => {
     vi.mocked(searchSegmentsApi).mockResolvedValueOnce([
-      makeSegment({ uid: 'a', segment_id: 'a', place_id: 'N-P001' }),
-      makeSegment({ uid: 'b', segment_id: 'b', place_id: 'N-P001' }),
+      makeSegment({ uid: 'a', segment_id: 'a', place_id: 'P001' }),
+      makeSegment({ uid: 'b', segment_id: 'b', place_id: 'P001' }),
     ])
 
     renderAt('/search?q=%EA%B2%BD%EB%B3%B5%EA%B6%81')
@@ -220,7 +220,7 @@ describe('SearchResults', () => {
 
   it('shows a map with markers when "지도로 보기" is clicked', async () => {
     const user = userEvent.setup()
-    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([makeSegment({ place_id: 'N-P001' })])
+    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([makeSegment({ place_id: 'P001' })])
 
     renderAt('/search?q=palace')
     await screen.findByText('테스트 장소')
