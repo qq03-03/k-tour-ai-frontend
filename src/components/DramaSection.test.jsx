@@ -28,6 +28,19 @@ describe('DramaSection', () => {
     }
   })
 
+  it('links using the real backend segment_id, not a locally-derived id the API would not recognize', () => {
+    // Regression test: Detail.jsx now fetches from the real backend by
+    // segment_id (e.g. "V007_P031_S002_SCENE_001"), not the locally-derived
+    // `uid` (a sanitized keyframe_path, e.g. "keyframes_V007_..._jpg") that
+    // only ever matched local mock data. A link built from the wrong one
+    // 404s against the real API with no visible error.
+    renderWithLanguage(<MemoryRouter><DramaSection /></MemoryRouter>)
+    const links = screen.getAllByRole('link')
+    for (const link of links) {
+      expect(link.getAttribute('href')).toMatch(/^\/segment\/V\d+_P\w+_S\d+_SCENE_\d+$/)
+    }
+  })
+
   it('hides an image without crashing when the image fails to load', () => {
     renderWithLanguage(<MemoryRouter><DramaSection /></MemoryRouter>)
     const [firstImage] = screen.getAllByRole('img')
