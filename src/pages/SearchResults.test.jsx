@@ -105,6 +105,29 @@ describe('SearchResults', () => {
     expect(await screen.findByText(/검색 결과를 불러오지 못했어요/)).toBeInTheDocument()
   })
 
+  it('shows loading message while the API call is in flight', async () => {
+    let resolve
+    const apiPromise = new Promise((r) => {
+      resolve = r
+    })
+
+    vi.mocked(searchSegmentsApi).mockReturnValueOnce(apiPromise)
+
+    renderAt('/search?q=test')
+
+    // Assert loading text is visible BEFORE resolving
+    expect(screen.getByText('검색 중이에요...')).toBeInTheDocument()
+
+    // Resolve the API call with results
+    resolve([makeSegment({ place_name: '테스트 검색 결과' })])
+
+    // Wait for results to appear
+    expect(await screen.findByText('테스트 검색 결과')).toBeInTheDocument()
+
+    // Assert loading text is now gone
+    expect(screen.queryByText('검색 중이에요...')).not.toBeInTheDocument()
+  })
+
   it('filters by season from the URL and sends the season filter to the API', async () => {
     vi.mocked(searchSegmentsApi).mockResolvedValueOnce([makeSegment({ place_id: 'N-P001' })])
 
