@@ -9,6 +9,7 @@ import KakaoMap from '../components/KakaoMap.jsx'
 import { themes } from '../data/themes.js'
 import { placeCoordinates } from '../data/placeCoordinates.js'
 import { searchSegmentsApi } from '../lib/api.js'
+import { deriveRegionFilterFromQuery } from '../lib/deriveRegionFilterFromQuery.js'
 import { dedupeByPlace } from '../lib/dedupeByPlace.js'
 import { dedupeByDrama } from '../lib/dedupeByDrama.js'
 import { getMapMarkers } from '../lib/getMapMarkers.js'
@@ -27,14 +28,33 @@ export default function SearchResults() {
   const query = searchParams.get('q') || ''
   const season = searchParams.get('season')
   const themeId = searchParams.get('theme')
+  const dramaTitle = searchParams.get('drama')
   const theme = themeId ? themes.find((t2) => t2.id === themeId) : null
   const isBrowsing = Boolean(season || themeId)
+  const isDramaBrowsing = Boolean(dramaTitle)
 
   useEffect(() => {
     let cancelled = false
 
     async function run() {
       setError(null)
+
+      if (dramaTitle) {
+        setIsLoading(true)
+        try {
+          const searchResults = await searchSegmentsApi({
+            query: dramaTitle,
+            filters: { drama_title: [dramaTitle] },
+            topK: 100,
+          })
+          if (!cancelled) setResults(searchResults)
+        } catch {
+          if (!cancelled) setError(t('search_error_message'))
+        } finally {
+          if (!cancelled) setIsLoading(false)
+        }
+        return
+      }
 
       if (theme && theme.keywords.length === 0) {
         setResults([])
@@ -51,7 +71,11 @@ export default function SearchResults() {
 
       setIsLoading(true)
       try {
-        const filters = season ? { season: [season] } : {}
+        const regionFilter = query ? deriveRegionFilterFromQuery(query) : null
+        const filters = {
+          ...(season ? { season: [season] } : {}),
+          ...(regionFilter ? { region: regionFilter } : {}),
+        }
         const searchResults = await searchSegmentsApi({ query: effectiveQuery, filters })
         if (!cancelled) setResults(searchResults)
       } catch {
@@ -63,9 +87,9 @@ export default function SearchResults() {
 
     run()
     return () => { cancelled = true }
-  }, [query, season, themeId])
+  }, [query, season, themeId, dramaTitle])
 
-  const displayResults = isBrowsing ? dedupeByDrama(dedupeByPlace(results)) : results
+  const displayResults = isDramaBrowsing ? results : isBrowsing ? dedupeByDrama(dedupeByPlace(results)) : results
   const localizedResults = displayResults.map((segment) => localizeSegment(segment, lang))
 
   function handleSearch(newQuery) {

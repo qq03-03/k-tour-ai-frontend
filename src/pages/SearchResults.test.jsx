@@ -211,6 +211,34 @@ describe('SearchResults', () => {
     expect(searchSegmentsApi).not.toHaveBeenCalled()
   })
 
+  it('drama browsing sends the drama_title hard filter and a large top_k, to fetch every scene', async () => {
+    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([makeSegment()])
+
+    renderAt(`/search?drama=${encodeURIComponent('호텔 델루나')}`)
+
+    await waitFor(() => {
+      expect(searchSegmentsApi).toHaveBeenCalledWith({
+        query: '호텔 델루나',
+        filters: { drama_title: ['호텔 델루나'] },
+        topK: 100,
+      })
+    })
+  })
+
+  it('drama browsing does not dedupe by place or drama -- every scene from that drama should show', async () => {
+    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([
+      makeSegment({ uid: 'a', segment_id: 'a', place_id: 'P001', drama_title: '호텔 델루나' }),
+      makeSegment({ uid: 'b', segment_id: 'b', place_id: 'P001', drama_title: '호텔 델루나' }),
+      makeSegment({ uid: 'c', segment_id: 'c', place_id: 'P002', drama_title: '호텔 델루나' }),
+    ])
+
+    renderAt(`/search?drama=${encodeURIComponent('호텔 델루나')}`)
+
+    await waitFor(() => {
+      expect(resultLinks()).toHaveLength(3)
+    })
+  })
+
   it('does not dedupe by place for a plain text search with no season filter', async () => {
     vi.mocked(searchSegmentsApi).mockResolvedValueOnce([
       makeSegment({ uid: 'a', segment_id: 'a', place_id: 'P001' }),
@@ -221,6 +249,36 @@ describe('SearchResults', () => {
 
     await waitFor(() => {
       expect(resultLinks()).toHaveLength(2)
+    })
+  })
+
+  it('adds a region hard filter when the query contains a colloquial region grouping', async () => {
+    // "경상도" isn't a literal administrative region, so CLIP semantic
+    // matching alone can surface unrelated results (e.g. Seoul). Recognized
+    // groupings get sent as an additional region hard filter alongside the
+    // original free-text query.
+    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([])
+
+    renderAt(`/search?q=${encodeURIComponent('경상도')}`)
+
+    await waitFor(() => {
+      expect(searchSegmentsApi).toHaveBeenCalledWith({
+        query: '경상도',
+        filters: { region: ['부산광역시', '대구광역시', '울산광역시', '경상북도', '경상남도'] },
+      })
+    })
+  })
+
+  it('does not add a region filter for a query with no recognized region grouping', async () => {
+    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([])
+
+    renderAt(`/search?q=${encodeURIComponent('가을 단풍길')}`)
+
+    await waitFor(() => {
+      expect(searchSegmentsApi).toHaveBeenCalledWith({
+        query: '가을 단풍길',
+        filters: {},
+      })
     })
   })
 
