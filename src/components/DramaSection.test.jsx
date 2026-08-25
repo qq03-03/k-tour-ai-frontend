@@ -28,10 +28,18 @@ describe('DramaSection', () => {
     }
   })
 
-  it('hides an image without crashing when the keyframe fails to load', () => {
+  it('hides an image without crashing when the image fails to load', () => {
     renderWithLanguage(<MemoryRouter><DramaSection /></MemoryRouter>)
     const [firstImage] = screen.getAllByRole('img')
     fireEvent.error(firstImage)
     expect(firstImage.style.visibility).toBe('hidden')
+  })
+
+  it('uses the team-provided main image (drama-images/{video_id prefix}.webp) instead of a scene keyframe', () => {
+    renderWithLanguage(<MemoryRouter><DramaSection /></MemoryRouter>)
+    const images = screen.getAllByRole('img')
+    for (const image of images) {
+      expect(image.getAttribute('src')).toMatch(/drama-images\/V\d+\.webp$/)
+    }
   })
 })

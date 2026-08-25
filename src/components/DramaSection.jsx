@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { mockSegments } from '../data/mockSegments.js'
 import { getFeaturedDramas } from '../lib/getFeaturedDramas.js'
 import { localizeSegment } from '../lib/localizeSegment.js'
+import { deriveDramaImagePath } from '../lib/deriveDramaImagePath.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 export default function DramaSection() {
@@ -13,7 +14,7 @@ export default function DramaSection() {
       {dramas.map((drama) => (
         <Link key={drama.uid} to={`/segment/${drama.uid}`} style={{ flex: '0 0 140px' }}>
           <img
-            src={`${import.meta.env.BASE_URL}${drama.keyframe_path}`}
+            src={`${import.meta.env.BASE_URL}${deriveDramaImagePath(drama.video_id) || drama.keyframe_path}`}
             alt={drama.drama_title}
             onError={(event) => { event.currentTarget.style.visibility = 'hidden' }}
             style={{ width: '100%', height: 90, objectFit: 'cover', borderRadius: 16, background: '#e2e8f0' }}
