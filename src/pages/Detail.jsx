@@ -1,23 +1,48 @@
+import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Header from '../components/Header.jsx'
 import Footer from '../components/Footer.jsx'
 import KakaoMap from '../components/KakaoMap.jsx'
-import { mockSegments } from '../data/mockSegments.js'
 import { placeCoordinates } from '../data/placeCoordinates.js'
 import { getMapMarkers } from '../lib/getMapMarkers.js'
 import { localizeSegment } from '../lib/localizeSegment.js'
 import { buildVideoUrl } from '../lib/buildVideoUrl.js'
 import { deriveVideoUrlFromVideoId } from '../lib/deriveVideoUrlFromVideoId.js'
+import { getSegmentByIdApi } from '../lib/api.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 export default function Detail() {
   const { segmentId: uid } = useParams()
   const { lang, t } = useLanguage()
-  const found = mockSegments.find((s) => s.uid === uid)
+  const [found, setFound] = useState(undefined)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    setIsLoading(true)
+    getSegmentByIdApi(uid)
+      .then((result) => { if (!cancelled) setFound(result) })
+      .catch(() => { if (!cancelled) setFound(undefined) })
+      .finally(() => { if (!cancelled) setIsLoading(false) })
+    return () => { cancelled = true }
+  }, [uid])
+
   const segment = found ? localizeSegment(found, lang) : undefined
   const placeCoord = segment ? placeCoordinates[segment.place_id] : undefined
   const locationLabel = placeCoord?.address || segment?.region
   const videoUrl = segment ? deriveVideoUrlFromVideoId(segment.video_id) : undefined
+
+  if (isLoading) {
+    return (
+      <div>
+        <Header />
+        <div style={{ padding: 48, textAlign: 'center', color: '#94a3b8' }}>
+          <p>{t('search_loading_message')}</p>
+        </div>
+        <Footer />
+      </div>
+    )
+  }
 
   if (!segment) {
     return (
