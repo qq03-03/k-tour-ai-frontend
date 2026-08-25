@@ -198,8 +198,14 @@ describe('SearchResults', () => {
     })
   })
 
-  it('theme with empty keywords shows empty results without calling the API', async () => {
-    renderAt('/search?theme=cherry-blossom')
+  it('an unrecognized theme id shows empty results without calling the API', async () => {
+    // Every theme in themes.js currently has real keywords (cherry-blossom's
+    // empty-array case, once used to exercise this same "don't call the API"
+    // guard, was filled in once real cherry-blossom scenes were confirmed in
+    // the dataset). A theme id that doesn't match anything in themes.js at
+    // all -- e.g. a stale bookmark -- exercises the same underlying
+    // guard: no effective query, so no request is made.
+    renderAt('/search?theme=does-not-exist')
 
     expect(await screen.findByText(/검색 결과가 없어요/)).toBeInTheDocument()
     expect(searchSegmentsApi).not.toHaveBeenCalled()
