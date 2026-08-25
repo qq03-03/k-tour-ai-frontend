@@ -1,9 +1,12 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import SearchResults from './SearchResults.jsx'
 import { LanguageProvider } from '../i18n/LanguageContext.jsx'
+import { searchSegmentsApi } from '../lib/api.js'
+
+vi.mock('../lib/api.js')
 
 function renderAt(path) {
   return render(
@@ -15,6 +18,40 @@ function renderAt(path) {
       </MemoryRouter>
     </LanguageProvider>,
   )
+}
+
+// Header always renders its own "K-Tour AI" home Link (href="/"), so raw
+// getAllByRole('link') queries also include it. Scope link assertions to the
+// ResultCard links (href starts with /segment/) to test dedup logic only.
+function resultLinks() {
+  return screen.getAllByRole('link').filter((link) => link.getAttribute('href')?.startsWith('/segment/'))
+}
+
+// Small controlled fixtures in the shape mapSearchResponse.js produces
+// (uid, similarity, etc. already present) -- searchSegmentsApi is mocked so
+// mapSearchResponse never actually runs.
+function makeSegment(overrides = {}) {
+  return {
+    uid: 'V900_P900_S001_SCENE_001',
+    segment_id: 'V900_P900_S001_SCENE_001',
+    video_id: 'V900_testvideo',
+    place_id: 'N-P900',
+    place_name: '테스트 장소',
+    region: '서울특별시',
+    city: '종로구',
+    drama_title: '테스트 드라마',
+    start_time: 0,
+    end_time: 10,
+    season: '여름',
+    time_of_day: '낮',
+    description: '테스트 설명입니다.',
+    mood: ['평화로운'],
+    activity: ['걷기'],
+    scene_elements: ['길'],
+    keyframe_path: 'keyframes/test.jpg',
+    similarity: 0.9,
+    ...overrides,
+  }
 }
 
 describe('SearchResults', () => {
@@ -39,79 +76,169 @@ describe('SearchResults', () => {
         load: (callback) => callback(),
       },
     }
+    vi.mocked(searchSegmentsApi).mockReset()
   })
 
-  it('shows matching results for a query present in the real mock data', () => {
+  it('shows matching results for a query', async () => {
+    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([
+      makeSegment({ place_name: '고창 학원농장' }),
+    ])
+
     renderAt('/search?q=canola')
-    expect(screen.getAllByText('고창 학원농장').length).toBeGreaterThan(0)
+
+    expect(await screen.findByText('고창 학원농장')).toBeInTheDocument()
   })
 
-  it('shows the empty state for a query that matches nothing', () => {
+  it('shows the empty state for a query that matches nothing', async () => {
+    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([])
+
     renderAt('/search?q=submarine spaceship dinosaur')
-    expect(screen.getByText(/검색 결과가 없어요/)).toBeInTheDocument()
+
+    expect(await screen.findByText(/검색 결과가 없어요/)).toBeInTheDocument()
   })
 
-  it('filters by season from the URL', () => {
-    // 284 of the 517 total segments match season=summer, so this renders far
-    // more ResultCards than the empty-query default and needs more time
-    // under full-suite load.
-    renderAt('/search?season=summer')
-    expect(screen.getAllByRole('link').length).toBeGreaterThan(0)
-  }, 15000)
+  it('shows an error state when the API call fails', async () => {
+    vi.mocked(searchSegmentsApi).mockRejectedValueOnce(new Error('network down'))
 
-  it('shows only one card per place when filtering by season, even if the place has many matching segments', () => {
-    // 경복궁 (place_id N-P016) has 27 separate summer-matching segments in the
-    // 517 dataset; without dedup this page would render 27 near-identical cards.
-    renderAt('/search?season=summer')
-    const links = screen.getAllByRole('link')
-    const hrefs = links.map((link) => link.getAttribute('href'))
-    const gyeongbokLinks = hrefs.filter((href) => href.includes('V011_Nba1McqxPEo'))
-    expect(gyeongbokLinks.length).toBeLessThanOrEqual(1)
-  }, 15000)
+    renderAt('/search?q=canola')
 
-  it('shows only one card per drama when filtering by season, even if the drama was filmed at several different places', () => {
-    // 그 해 우리는 has summer-tagged segments at 3 different places (P001,
-    // N-P005, N-P001); deduping by place alone still leaves 3 cards for it.
-    renderAt('/search?season=summer')
-    expect(screen.getAllByText(/그 해 우리는/)).toHaveLength(1)
-  }, 15000)
+    expect(await screen.findByText(/검색 결과를 불러오지 못했어요/)).toBeInTheDocument()
+  })
 
-  it('shows only one card per place when filtering by theme, even if the place has many matching segments', () => {
-    // 경복궁 (place_id N-P016) has 22 separate segments matching the drama theme.
+  it('filters by season from the URL and sends the season filter to the API', async () => {
+    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([makeSegment({ place_id: 'N-P001' })])
+
+    renderAt('/search?season=summer')
+
+    await screen.findByText('테스트 장소')
+    expect(searchSegmentsApi).toHaveBeenCalledWith({
+      query: 'summer',
+      filters: { season: ['summer'] },
+    })
+  })
+
+  it('shows only one card per place when filtering by season, even if the place has many matching segments', async () => {
+    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([
+      makeSegment({ uid: 'a', segment_id: 'a', place_id: 'N-P001' }),
+      makeSegment({ uid: 'b', segment_id: 'b', place_id: 'N-P001' }),
+      makeSegment({ uid: 'c', segment_id: 'c', place_id: 'N-P001' }),
+    ])
+
+    renderAt('/search?season=summer')
+
+    await screen.findByText('테스트 장소')
+    expect(resultLinks()).toHaveLength(1)
+  })
+
+  it('shows only one card per drama when filtering by season, even if the drama was filmed at several different places', async () => {
+    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([
+      makeSegment({ uid: 'a', segment_id: 'a', place_id: 'N-P001', drama_title: '그 해 우리는' }),
+      makeSegment({ uid: 'b', segment_id: 'b', place_id: 'N-P002', drama_title: '그 해 우리는' }),
+      makeSegment({ uid: 'c', segment_id: 'c', place_id: 'N-P003', drama_title: '그 해 우리는' }),
+    ])
+
+    renderAt('/search?season=summer')
+
+    await waitFor(() => {
+      expect(screen.getAllByText(/그 해 우리는/)).toHaveLength(1)
+    })
+  })
+
+  it('shows only one card per place when filtering by theme, even if the place has many matching segments', async () => {
+    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([
+      makeSegment({ uid: 'a', segment_id: 'a', place_id: 'N-P001' }),
+      makeSegment({ uid: 'b', segment_id: 'b', place_id: 'N-P001' }),
+    ])
+
     renderAt('/search?theme=traditional')
-    const links = screen.getAllByRole('link')
-    const hrefs = links.map((link) => link.getAttribute('href'))
-    const gyeongbokLinks = hrefs.filter((href) => href.includes('V011_yZeNfaIK7Nw'))
-    expect(gyeongbokLinks.length).toBeLessThanOrEqual(1)
-  }, 15000)
 
-  it('shows only one card per drama when filtering by theme, even if the drama was filmed at several different places', () => {
-    // 그 해 우리는 matches the drama theme at 4 different places.
+    await screen.findByText('테스트 장소')
+    expect(resultLinks()).toHaveLength(1)
+    expect(searchSegmentsApi).toHaveBeenCalledWith({
+      query: 'hanok palace traditional 전통 한옥',
+      filters: {},
+    })
+  })
+
+  it('shows only one card per drama when filtering by theme, even if the drama was filmed at several different places', async () => {
+    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([
+      makeSegment({ uid: 'a', segment_id: 'a', place_id: 'N-P001', drama_title: '그 해 우리는' }),
+      makeSegment({ uid: 'b', segment_id: 'b', place_id: 'N-P002', drama_title: '그 해 우리는' }),
+      makeSegment({ uid: 'c', segment_id: 'c', place_id: 'N-P003', drama_title: '그 해 우리는' }),
+      makeSegment({ uid: 'd', segment_id: 'd', place_id: 'N-P004', drama_title: '그 해 우리는' }),
+    ])
+
     renderAt('/search?theme=traditional')
-    expect(screen.getAllByText(/그 해 우리는/)).toHaveLength(1)
-  }, 15000)
 
-  it('does not dedupe by place for a plain text search with no season filter', () => {
+    await waitFor(() => {
+      expect(screen.getAllByText(/그 해 우리는/)).toHaveLength(1)
+    })
+  })
+
+  it('theme with empty keywords shows empty results without calling the API', async () => {
+    renderAt('/search?theme=cherry-blossom')
+
+    expect(await screen.findByText(/검색 결과가 없어요/)).toBeInTheDocument()
+    expect(searchSegmentsApi).not.toHaveBeenCalled()
+  })
+
+  it('does not dedupe by place for a plain text search with no season filter', async () => {
+    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([
+      makeSegment({ uid: 'a', segment_id: 'a', place_id: 'N-P001' }),
+      makeSegment({ uid: 'b', segment_id: 'b', place_id: 'N-P001' }),
+    ])
+
     renderAt('/search?q=%EA%B2%BD%EB%B3%B5%EA%B6%81')
-    const links = screen.getAllByRole('link')
-    const hrefs = links.map((link) => link.getAttribute('href'))
-    const gyeongbokLinks = hrefs.filter((href) => href.includes('V011_Nba1McqxPEo'))
-    expect(gyeongbokLinks.length).toBeGreaterThan(1)
+
+    await waitFor(() => {
+      expect(resultLinks()).toHaveLength(2)
+    })
   })
 
   it('shows a map with markers when "지도로 보기" is clicked', async () => {
     const user = userEvent.setup()
+    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([makeSegment({ place_id: 'N-P001' })])
+
     renderAt('/search?q=palace')
+    await screen.findByText('테스트 장소')
+
     await user.click(screen.getByText('🗺️ 지도로 보기'))
+
     expect(window.kakao.maps.Map).toHaveBeenCalledTimes(1)
     expect(window.kakao.maps.Marker).toHaveBeenCalled()
   })
 
   it('shows results in English when the language is switched to en', async () => {
     const user = userEvent.setup()
+    // Real segment_id with a real entry in segmentTranslations517.json
+    // (keyframeId `${segment_id}__${segment_id}`), mirrored ko fields so the
+    // initial Korean render matches, then verified against its en fields.
+    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([
+      makeSegment({
+        uid: 'V002_P004_S001_SCENE_001',
+        segment_id: 'V002_P004_S001_SCENE_001',
+        video_id: 'V002_Q6qUEvQfjRs',
+        place_id: 'P004',
+        place_name: '고창 학원농장',
+        region: '전북특별자치도',
+        city: '고창군',
+        drama_title: '폭싹 속았수다',
+        season: '봄',
+        time_of_day: '낮',
+        description: '구름 낀 하늘 아래 노란 꽃이 활짝 핀 생생한 들판과 그 사이로 구불구불 이어지는 길이 보인다.',
+        mood: ['평화로운', '생기 넘치는', '자연적인'],
+        activity: ['서 있기', '걷기'],
+        scene_elements: ['들판', '노란 꽃', '길', '하늘', '구름', '나무', '땅'],
+      }),
+    ])
+
     renderAt('/search?q=canola')
+
+    expect(await screen.findByText('고창 학원농장')).toBeInTheDocument()
+
     await user.click(screen.getByRole('button', { name: '메뉴' }))
     await user.click(screen.getByRole('button', { name: 'EN' }))
+
     expect(await screen.findByText('Gochang Hakwon Farm')).toBeInTheDocument()
   })
 })
