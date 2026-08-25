@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { searchSegmentsApi, getSegmentByIdApi } from './api.js'
+import { searchSegmentsApi, getSegmentByIdApi, listSegmentsByDramaApi } from './api.js'
 
 const ORIGINAL_ENV = import.meta.env.VITE_API_BASE_URL
 
@@ -39,13 +39,6 @@ describe('searchSegmentsApi', () => {
     expect(JSON.parse(options.body)).toEqual({ query: '여름', season: ['여름'] })
   })
 
-  it('includes top_k in the request body when topK is provided', async () => {
-    fetch.mockResolvedValueOnce(jsonResponse(200, { results: [], fallback_used: false, fallback_reason: null }))
-    await searchSegmentsApi({ query: '호텔 델루나', filters: { drama_title: ['호텔 델루나'] }, topK: 100 })
-    const [, options] = fetch.mock.calls[0]
-    expect(JSON.parse(options.body)).toEqual({ query: '호텔 델루나', drama_title: ['호텔 델루나'], top_k: 100 })
-  })
-
   it('throws a Korean error message on a non-2xx response', async () => {
     fetch.mockResolvedValueOnce(jsonResponse(503, { detail: '데이터베이스에 연결할 수 없어요.' }))
     await expect(searchSegmentsApi({ query: '가을' })).rejects.toThrow('검색 요청 실패')
@@ -80,5 +73,44 @@ describe('getSegmentByIdApi', () => {
   it('throws on a non-404 non-2xx response', async () => {
     fetch.mockResolvedValueOnce(jsonResponse(503, { detail: 'x' }))
     await expect(getSegmentByIdApi('any')).rejects.toThrow()
+  })
+})
+
+describe('listSegmentsByDramaApi', () => {
+  it('GETs /api/segments filtered by drama_title and returns every raw row, unranked', async () => {
+    fetch.mockResolvedValueOnce(jsonResponse(200, [
+      {
+        segment_id: 'V009_P015_S001_SCENE_001', video_id: 'V009_7ir6-MekfHU', place_id: 'P015',
+        place_name: '망상해변', region: '강원특별자치도', city: '동해시', drama_title: '호텔 델루나',
+        start_time: 0, end_time: 4.75, season: '여름', time_of_day: 'day', description: 'desc1',
+        mood: [], activity: [], scene_elements: [], keyframe_path: 'keyframes/a.jpg',
+      },
+      {
+        segment_id: 'V009_P015_S001_SCENE_002', video_id: 'V009_7ir6-MekfHU', place_id: 'P015',
+        place_name: '망상해변', region: '강원특별자치도', city: '동해시', drama_title: '호텔 델루나',
+        start_time: 5, end_time: 9, season: '여름', time_of_day: 'day', description: 'desc2',
+        mood: [], activity: [], scene_elements: [], keyframe_path: 'keyframes/b.jpg',
+      },
+    ]))
+
+    const result = await listSegmentsByDramaApi('호텔 델루나')
+
+    expect(fetch).toHaveBeenCalledWith(
+      `https://example-api.test/api/segments?drama_title=${encodeURIComponent('호텔 델루나')}`,
+      expect.anything(),
+    )
+    expect(result).toHaveLength(2)
+    expect(result[0].uid).toBe('V009_P015_S001_SCENE_001')
+    expect(result[1].uid).toBe('V009_P015_S001_SCENE_002')
+  })
+
+  it('throws a Korean error message on a non-2xx response', async () => {
+    fetch.mockResolvedValueOnce(jsonResponse(503, { detail: 'x' }))
+    await expect(listSegmentsByDramaApi('호텔 델루나')).rejects.toThrow('구간 목록 요청 실패')
+  })
+
+  it('throws on a network failure', async () => {
+    fetch.mockRejectedValueOnce(new TypeError('Failed to fetch'))
+    await expect(listSegmentsByDramaApi('호텔 델루나')).rejects.toThrow()
   })
 })

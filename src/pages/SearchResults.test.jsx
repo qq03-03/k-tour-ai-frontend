@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import SearchResults from './SearchResults.jsx'
 import { LanguageProvider } from '../i18n/LanguageContext.jsx'
-import { searchSegmentsApi } from '../lib/api.js'
+import { searchSegmentsApi, listSegmentsByDramaApi } from '../lib/api.js'
 
 vi.mock('../lib/api.js')
 
@@ -77,6 +77,7 @@ describe('SearchResults', () => {
       },
     }
     vi.mocked(searchSegmentsApi).mockReset()
+    vi.mocked(listSegmentsByDramaApi).mockReset()
   })
 
   it('shows matching results for a query', async () => {
@@ -211,22 +212,23 @@ describe('SearchResults', () => {
     expect(searchSegmentsApi).not.toHaveBeenCalled()
   })
 
-  it('drama browsing sends the drama_title hard filter and a large top_k, to fetch every scene', async () => {
-    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([makeSegment()])
+  it('drama browsing calls listSegmentsByDramaApi (not the ranked/deduped search endpoint)', async () => {
+    // POST /api/search always collapses to one result per source_segment_id,
+    // so a drama with 53 curated SCENE entries across only 4 distinct shots
+    // would only ever return 4 rows there. Drama browsing needs the plain
+    // segment-listing endpoint instead, which returns every SCENE.
+    vi.mocked(listSegmentsByDramaApi).mockResolvedValueOnce([makeSegment()])
 
     renderAt(`/search?drama=${encodeURIComponent('호텔 델루나')}`)
 
     await waitFor(() => {
-      expect(searchSegmentsApi).toHaveBeenCalledWith({
-        query: '호텔 델루나',
-        filters: { drama_title: ['호텔 델루나'] },
-        topK: 100,
-      })
+      expect(listSegmentsByDramaApi).toHaveBeenCalledWith('호텔 델루나')
     })
+    expect(searchSegmentsApi).not.toHaveBeenCalled()
   })
 
   it('drama browsing does not dedupe by place or drama -- every scene from that drama should show', async () => {
-    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([
+    vi.mocked(listSegmentsByDramaApi).mockResolvedValueOnce([
       makeSegment({ uid: 'a', segment_id: 'a', place_id: 'P001', drama_title: '호텔 델루나' }),
       makeSegment({ uid: 'b', segment_id: 'b', place_id: 'P001', drama_title: '호텔 델루나' }),
       makeSegment({ uid: 'c', segment_id: 'c', place_id: 'P002', drama_title: '호텔 델루나' }),
@@ -237,6 +239,14 @@ describe('SearchResults', () => {
     await waitFor(() => {
       expect(resultLinks()).toHaveLength(3)
     })
+  })
+
+  it('shows an error state when listSegmentsByDramaApi fails', async () => {
+    vi.mocked(listSegmentsByDramaApi).mockRejectedValueOnce(new Error('network down'))
+
+    renderAt(`/search?drama=${encodeURIComponent('호텔 델루나')}`)
+
+    expect(await screen.findByText(/검색 결과를 불러오지 못했어요/)).toBeInTheDocument()
   })
 
   it('does not dedupe by place for a plain text search with no season filter', async () => {

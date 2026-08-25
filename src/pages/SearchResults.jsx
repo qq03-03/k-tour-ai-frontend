@@ -8,7 +8,7 @@ import Footer from '../components/Footer.jsx'
 import KakaoMap from '../components/KakaoMap.jsx'
 import { themes } from '../data/themes.js'
 import { placeCoordinates } from '../data/placeCoordinates.js'
-import { searchSegmentsApi } from '../lib/api.js'
+import { searchSegmentsApi, listSegmentsByDramaApi } from '../lib/api.js'
 import { deriveRegionFilterFromQuery } from '../lib/deriveRegionFilterFromQuery.js'
 import { dedupeByPlace } from '../lib/dedupeByPlace.js'
 import { dedupeByDrama } from '../lib/dedupeByDrama.js'
@@ -42,12 +42,15 @@ export default function SearchResults() {
       if (dramaTitle) {
         setIsLoading(true)
         try {
-          const searchResults = await searchSegmentsApi({
-            query: dramaTitle,
-            filters: { drama_title: [dramaTitle] },
-            topK: 100,
-          })
-          if (!cancelled) setResults(searchResults)
+          // Not searchSegmentsApi: POST /api/search always collapses results
+          // to one representative SCENE per source_segment_id (its fixed
+          // "same shot -> one result" rule), so a drama filmed at 4 distinct
+          // locations across 53 curated SCENE entries would only ever
+          // return 4 rows there. listSegmentsByDramaApi hits the plain,
+          // unranked segment-listing endpoint instead, which returns every
+          // individual SCENE the team split out, even ones sharing a shot.
+          const segments = await listSegmentsByDramaApi(dramaTitle)
+          if (!cancelled) setResults(segments)
         } catch {
           if (!cancelled) setError(t('search_error_message'))
         } finally {
