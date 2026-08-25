@@ -227,7 +227,13 @@ describe('SearchResults', () => {
     expect(searchSegmentsApi).not.toHaveBeenCalled()
   })
 
-  it('drama browsing does not dedupe by place or drama -- every scene from that drama should show', async () => {
+  it('drama browsing dedupes by place -- many scenes at the same spot collapse to one card', async () => {
+    // listSegmentsByDramaApi returns every individual SCENE (e.g. 53 for
+    // 호텔 델루나), but most of those are the same handful of physical
+    // locations shot many times over. Showing all 53 cards meant the same
+    // place name repeating dozens of times, so results are deduped by
+    // place -- one card per distinct location, same as season/theme
+    // browsing already does.
     vi.mocked(listSegmentsByDramaApi).mockResolvedValueOnce([
       makeSegment({ uid: 'a', segment_id: 'a', place_id: 'P001', drama_title: '호텔 델루나' }),
       makeSegment({ uid: 'b', segment_id: 'b', place_id: 'P001', drama_title: '호텔 델루나' }),
@@ -237,7 +243,7 @@ describe('SearchResults', () => {
     renderAt(`/search?drama=${encodeURIComponent('호텔 델루나')}`)
 
     await waitFor(() => {
-      expect(resultLinks()).toHaveLength(3)
+      expect(resultLinks()).toHaveLength(2)
     })
   })
 

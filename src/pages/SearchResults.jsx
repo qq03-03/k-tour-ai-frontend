@@ -92,7 +92,11 @@ export default function SearchResults() {
     return () => { cancelled = true }
   }, [query, season, themeId, dramaTitle])
 
-  const displayResults = isDramaBrowsing ? results : isBrowsing ? dedupeByDrama(dedupeByPlace(results)) : results
+  const displayResults = isDramaBrowsing
+    ? dedupeByPlace(results)
+    : isBrowsing
+      ? dedupeByDrama(dedupeByPlace(results))
+      : results
   const localizedResults = displayResults.map((segment) => localizeSegment(segment, lang))
 
   function handleSearch(newQuery) {
