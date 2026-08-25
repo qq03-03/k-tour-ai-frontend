@@ -19,26 +19,25 @@ describe('DramaSection', () => {
     expect(links).toHaveLength(uniqueDramaCount)
   })
 
-  it('links each drama to its detail page', () => {
+  it('links each drama to a search filtered to every scene from that drama', () => {
+    // Clicking a drama card used to go straight to one representative
+    // scene's detail page -- but a drama can have dozens of segments, and
+    // the single-scene link gave no way to see the rest. Linking to
+    // /search?drama=<title> instead routes through SearchResults' drama
+    // browsing mode, which fetches every matching scene unranked.
     renderWithLanguage(<MemoryRouter><DramaSection /></MemoryRouter>)
     const links = screen.getAllByRole('link')
     expect(links.length).toBeGreaterThan(0)
     for (const link of links) {
-      expect(link.getAttribute('href')).toMatch(/^\/segment\//)
+      expect(link.getAttribute('href')).toMatch(/^\/search\?drama=/)
     }
   })
 
-  it('links using the real backend segment_id, not a locally-derived id the API would not recognize', () => {
-    // Regression test: Detail.jsx now fetches from the real backend by
-    // segment_id (e.g. "V007_P031_S002_SCENE_001"), not the locally-derived
-    // `uid` (a sanitized keyframe_path, e.g. "keyframes_V007_..._jpg") that
-    // only ever matched local mock data. A link built from the wrong one
-    // 404s against the real API with no visible error.
+  it('URL-encodes the drama title in the link', () => {
     renderWithLanguage(<MemoryRouter><DramaSection /></MemoryRouter>)
     const links = screen.getAllByRole('link')
-    for (const link of links) {
-      expect(link.getAttribute('href')).toMatch(/^\/segment\/V\d+_P\w+_S\d+_SCENE_\d+$/)
-    }
+    const hotelDelLuna = links.find((link) => link.textContent.includes('호텔 델루나'))
+    expect(hotelDelLuna.getAttribute('href')).toBe(`/search?drama=${encodeURIComponent('호텔 델루나')}`)
   })
 
   it('hides an image without crashing when the image fails to load', () => {

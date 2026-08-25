@@ -39,6 +39,13 @@ describe('searchSegmentsApi', () => {
     expect(JSON.parse(options.body)).toEqual({ query: '여름', season: ['여름'] })
   })
 
+  it('includes top_k in the request body when topK is provided', async () => {
+    fetch.mockResolvedValueOnce(jsonResponse(200, { results: [], fallback_used: false, fallback_reason: null }))
+    await searchSegmentsApi({ query: '호텔 델루나', filters: { drama_title: ['호텔 델루나'] }, topK: 100 })
+    const [, options] = fetch.mock.calls[0]
+    expect(JSON.parse(options.body)).toEqual({ query: '호텔 델루나', drama_title: ['호텔 델루나'], top_k: 100 })
+  })
+
   it('throws a Korean error message on a non-2xx response', async () => {
     fetch.mockResolvedValueOnce(jsonResponse(503, { detail: '데이터베이스에 연결할 수 없어요.' }))
     await expect(searchSegmentsApi({ query: '가을' })).rejects.toThrow('검색 요청 실패')

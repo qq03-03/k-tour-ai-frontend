@@ -12,7 +12,7 @@ export default function DramaSection() {
   return (
     <div style={{ display: 'flex', gap: 14, overflowX: 'auto', paddingBottom: 8 }}>
       {dramas.map((drama) => (
-        <Link key={drama.segment_id} to={`/segment/${drama.segment_id}`} style={{ flex: '0 0 140px' }}>
+        <Link key={drama.segment_id} to={`/search?drama=${encodeURIComponent(drama.drama_title)}`} style={{ flex: '0 0 140px' }}>
           <img
             src={`${import.meta.env.BASE_URL}${deriveDramaImagePath(drama.video_id) || drama.keyframe_path}`}
             alt={drama.drama_title}
