@@ -5,11 +5,13 @@ import ThemeSection from './ThemeSection.jsx'
 import { renderWithLanguage } from '../test-utils.jsx'
 
 describe('ThemeSection', () => {
-  it('renders all 7 theme tags in Korean by default, without cafe or food', () => {
+  it('renders all 9 theme tags in Korean by default, without cafe or food', () => {
     renderWithLanguage(<ThemeSection selectedId={null} onSelect={() => {}} />)
     expect(screen.getByText('해변')).toBeInTheDocument()
     expect(screen.getByText('전통')).toBeInTheDocument()
     expect(screen.getByText('들판')).toBeInTheDocument()
+    expect(screen.getByText('등산')).toBeInTheDocument()
+    expect(screen.getByText('숲')).toBeInTheDocument()
     expect(screen.queryByText('카페')).not.toBeInTheDocument()
     expect(screen.queryByText('음식')).not.toBeInTheDocument()
   })
@@ -19,7 +21,7 @@ describe('ThemeSection', () => {
     const onSelect = vi.fn()
     renderWithLanguage(<ThemeSection selectedId={null} onSelect={onSelect} />)
     await user.click(screen.getByText('해변'))
-    expect(onSelect).toHaveBeenCalledWith('beach')
+    expect(onSelect).toHaveBeenCalledWith('sea')
   })
 
   it('renders theme tags in English when the language is set to en', () => {

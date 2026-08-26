@@ -180,9 +180,25 @@ describe('SearchResults', () => {
 
     await screen.findByText('테스트 장소')
     expect(resultLinks()).toHaveLength(1)
+    // Theme is a real backend hard filter now (see theme_mapping.py's
+    // source_segment_id -> themes mapping), not a bag of keywords joined
+    // into a free-text CLIP query -- so q stays empty and the theme id is
+    // sent as its own filter.
     expect(searchSegmentsApi).toHaveBeenCalledWith({
-      query: 'hanok palace traditional 전통 한옥',
-      filters: {},
+      query: '',
+      filters: { theme: ['traditional'] },
+    })
+  })
+
+  it('normalizes a legacy dash-separated theme id from an old bookmarked URL to its canonical id', async () => {
+    vi.mocked(searchSegmentsApi).mockResolvedValueOnce([makeSegment({ place_id: 'P001' })])
+
+    renderAt('/search?theme=beach')
+
+    await screen.findByText('테스트 장소')
+    expect(searchSegmentsApi).toHaveBeenCalledWith({
+      query: '',
+      filters: { theme: ['sea'] },
     })
   })
 
@@ -202,12 +218,9 @@ describe('SearchResults', () => {
   })
 
   it('an unrecognized theme id shows empty results without calling the API', async () => {
-    // Every theme in themes.js currently has real keywords (cherry-blossom's
-    // empty-array case, once used to exercise this same "don't call the API"
-    // guard, was filled in once real cherry-blossom scenes were confirmed in
-    // the dataset). A theme id that doesn't match anything in themes.js at
-    // all -- e.g. a stale bookmark -- exercises the same underlying
-    // guard: no effective query, so no request is made.
+    // A theme id that doesn't match anything in themes.js (even after legacy
+    // normalization) -- e.g. a stale bookmark -- must not be sent to the
+    // backend as a filter, since it's not one of the confirmed canonical ids.
     renderAt('/search?theme=does-not-exist')
 
     expect(await screen.findByText(/검색 결과가 없어요/)).toBeInTheDocument()

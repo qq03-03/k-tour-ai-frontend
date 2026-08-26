@@ -10,6 +10,7 @@ import { themes } from '../data/themes.js'
 import { placeCoordinates } from '../data/placeCoordinates.js'
 import { searchSegmentsApi, listSegmentsByDramaApi } from '../lib/api.js'
 import { deriveRegionFilterFromQuery } from '../lib/deriveRegionFilterFromQuery.js'
+import { normalizeThemeId } from '../lib/normalizeThemeId.js'
 import { dedupeByPlace } from '../lib/dedupeByPlace.js'
 import { dedupeByDrama } from '../lib/dedupeByDrama.js'
 import { getMapMarkers } from '../lib/getMapMarkers.js'
@@ -27,10 +28,10 @@ export default function SearchResults() {
 
   const query = searchParams.get('q') || ''
   const season = searchParams.get('season')
-  const themeId = searchParams.get('theme')
+  const rawThemeId = searchParams.get('theme')
   const dramaTitle = searchParams.get('drama')
-  const theme = themeId ? themes.find((t2) => t2.id === themeId) : null
-  const isBrowsing = Boolean(season || themeId)
+  const theme = rawThemeId ? themes.find((t2) => t2.id === normalizeThemeId(rawThemeId)) : null
+  const isBrowsing = Boolean(season || rawThemeId)
   const isDramaBrowsing = Boolean(dramaTitle)
 
   useEffect(() => {
@@ -59,13 +60,38 @@ export default function SearchResults() {
         return
       }
 
-      if (theme && theme.keywords.length === 0) {
+      if (rawThemeId && !theme) {
+        // Unrecognized theme id (even after legacy normalization) -- e.g. a
+        // stale bookmark -- isn't one of the backend's confirmed canonical
+        // ids, so don't send it as a filter.
         setResults([])
         setIsLoading(false)
         return
       }
 
-      const effectiveQuery = query || (theme ? theme.keywords.join(' ') : season)
+      if (theme) {
+        // Theme is a real backend hard filter (source_segment_id -> themes
+        // mapping in theme_mapping.py), not CLIP keyword search, so it works
+        // with q="" -- no free text needed to get results.
+        setIsLoading(true)
+        try {
+          const regionFilter = query ? deriveRegionFilterFromQuery(query) : null
+          const filters = {
+            theme: [theme.id],
+            ...(season ? { season: [season] } : {}),
+            ...(regionFilter ? { region: regionFilter } : {}),
+          }
+          const searchResults = await searchSegmentsApi({ query, filters })
+          if (!cancelled) setResults(searchResults)
+        } catch {
+          if (!cancelled) setError(t('search_error_message'))
+        } finally {
+          if (!cancelled) setIsLoading(false)
+        }
+        return
+      }
+
+      const effectiveQuery = query || season
       if (!effectiveQuery) {
         setResults([])
         setIsLoading(false)
@@ -90,7 +116,7 @@ export default function SearchResults() {
 
     run()
     return () => { cancelled = true }
-  }, [query, season, themeId, dramaTitle])
+  }, [query, season, rawThemeId, dramaTitle])
 
   const displayResults = isDramaBrowsing
     ? dedupeByPlace(results)
