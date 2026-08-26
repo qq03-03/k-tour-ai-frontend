@@ -52,6 +52,14 @@ export default function KakaoMap({ markers, timeoutMs = DEFAULT_TIMEOUT_MS }) {
 
     let cancelled = false
     let resizeObserver
+    // Markers created by this run of the effect. When markers changes again
+    // (e.g. results re-localized on a language switch) or the component
+    // unmounts, these must be explicitly detached with setMap(null) --
+    // creating a new kakao.maps.Map on the same container does not remove
+    // the previous map's marker/overlay layer on its own, so without this
+    // pins (and their radius circles) accumulated across every re-run
+    // instead of being replaced.
+    let createdMarkers = []
     setStatus('loading')
     const appKey = import.meta.env.VITE_KAKAO_MAP_KEY
 
@@ -70,6 +78,7 @@ export default function KakaoMap({ markers, timeoutMs = DEFAULT_TIMEOUT_MS }) {
         markers.forEach((marker) => {
           const position = new kakao.maps.LatLng(marker.latitude, marker.longitude)
           const markerInstance = new kakao.maps.Marker({ map, position, title: marker.label })
+          createdMarkers.push(markerInstance)
           bounds.extend(position)
 
           const infoWindow = new kakao.maps.InfoWindow({ content: buildInfoWindowContent(marker) })
@@ -112,6 +121,8 @@ export default function KakaoMap({ markers, timeoutMs = DEFAULT_TIMEOUT_MS }) {
     return () => {
       cancelled = true
       if (resizeObserver) resizeObserver.disconnect()
+      createdMarkers.forEach((marker) => marker.setMap(null))
+      createdMarkers = []
     }
   }, [markers, timeoutMs, retryCount])
 

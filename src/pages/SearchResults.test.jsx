@@ -67,7 +67,9 @@ describe('SearchResults', () => {
           this.setCenter = vi.fn()
           this.relayout = vi.fn()
         }),
-        Marker: vi.fn(function Marker() {}),
+        Marker: vi.fn(function Marker() {
+          this.setMap = vi.fn()
+        }),
         InfoWindow: vi.fn(function InfoWindow() {
           this.open = vi.fn()
           this.close = vi.fn()

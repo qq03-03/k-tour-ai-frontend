@@ -2,6 +2,7 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import KakaoMap from './KakaoMap.jsx'
+import { LanguageProvider } from '../i18n/LanguageContext.jsx'
 import { renderWithLanguage } from '../test-utils.jsx'
 
 function flushPromises() {
@@ -20,7 +21,9 @@ function createKakaoMock() {
         this.setCenter = vi.fn()
         this.relayout = vi.fn()
       }),
-      Marker: vi.fn(function Marker() {}),
+      Marker: vi.fn(function Marker() {
+        this.setMap = vi.fn()
+      }),
       InfoWindow: vi.fn(function InfoWindow(options) {
         this.content = options.content
         this.open = vi.fn()
@@ -105,6 +108,24 @@ describe('KakaoMap', () => {
     await vi.advanceTimersByTimeAsync(5001)
     await vi.advanceTimersByTimeAsync(0)
     expect(screen.getByText(/지도를 불러오지 못했어요/)).toBeInTheDocument()
+  })
+
+  it('removes the previous map\'s markers before creating new ones when markers change', async () => {
+    // Reproduces the reported bug: switching language re-localizes segments,
+    // producing a new markers array, which re-ran this effect without ever
+    // clearing the old map's markers -- so pins and their 2km radius circles
+    // accumulated 1 -> 2 -> 3 across KO -> EN -> JA instead of staying at 1.
+    window.kakao = createKakaoMock()
+    const { rerender } = renderWithLanguage(<KakaoMap markers={oneMarker} />)
+    await flushPromises()
+    const firstMarkerInstance = window.kakao.maps.Marker.mock.results[0].value
+
+    const secondMarker = [{ place_id: 'P002', label: '남산타워', latitude: 37.55, longitude: 126.99, dramaTitles: [] }]
+    rerender(<LanguageProvider><KakaoMap markers={secondMarker} /></LanguageProvider>)
+    await flushPromises()
+
+    expect(firstMarkerInstance.setMap).toHaveBeenCalledWith(null)
+    expect(window.kakao.maps.Marker).toHaveBeenCalledTimes(2)
   })
 
   it('retries loading when the retry button is clicked', async () => {
