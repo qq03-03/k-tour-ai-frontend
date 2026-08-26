@@ -10,7 +10,7 @@ export async function searchSegmentsApi({ query, filters = {} }) {
   const response = await fetch(`${baseUrl()}/api/search`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, ...filters }),
+    body: JSON.stringify({ q: query, ...filters }),
   }).catch(() => {
     throw new Error('검색 요청 실패: 네트워크 오류')
   })

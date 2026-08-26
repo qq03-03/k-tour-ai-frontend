@@ -26,7 +26,7 @@ describe('searchSegmentsApi', () => {
       expect.objectContaining({
         method: 'POST',
         headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify({ query: '가을 단풍길' }),
+        body: JSON.stringify({ q: '가을 단풍길' }),
       }),
     )
     expect(result).toEqual([])
@@ -36,7 +36,7 @@ describe('searchSegmentsApi', () => {
     fetch.mockResolvedValueOnce(jsonResponse(200, { results: [], fallback_used: false, fallback_reason: null }))
     await searchSegmentsApi({ query: '여름', filters: { season: ['여름'] } })
     const [, options] = fetch.mock.calls[0]
-    expect(JSON.parse(options.body)).toEqual({ query: '여름', season: ['여름'] })
+    expect(JSON.parse(options.body)).toEqual({ q: '여름', season: ['여름'] })
   })
 
   it('throws a Korean error message on a non-2xx response', async () => {
