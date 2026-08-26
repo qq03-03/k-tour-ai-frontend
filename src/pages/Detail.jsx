@@ -29,7 +29,11 @@ export default function Detail() {
 
   const segment = found ? localizeSegment(found, lang) : undefined
   const placeCoord = segment ? placeCoordinates[segment.place_id] : undefined
-  const locationLabel = placeCoord?.address || segment?.region
+  // placeCoordinates517.js only has Korean street addresses -- there's no
+  // translated string to show for a specific address, so only show it in
+  // Korean. Other languages fall back to segment.region, which
+  // localizeSegment has already translated for real.
+  const locationLabel = (lang === 'ko' && placeCoord?.address) || segment?.region
   const videoUrl = segment ? deriveVideoUrlFromVideoId(segment.video_id) : undefined
 
   if (isLoading) {

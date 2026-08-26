@@ -192,6 +192,24 @@ describe('Detail', () => {
     expect(await screen.findByText('Chungju Jungangtap Park')).toBeInTheDocument()
   })
 
+  it('shows the translated region instead of the untranslated Korean street address when the language is switched to en', async () => {
+    // placeCoordinates517.js only has Korean addresses -- there's no
+    // translated string to show for a specific street address, so a
+    // non-Korean viewer should see the region (which segmentTranslations517
+    // does have a real translation for) instead of raw Korean text.
+    const user = userEvent.setup()
+    vi.mocked(getSegmentByIdApi).mockResolvedValueOnce(makeSegment())
+
+    renderAt('V007_P031_S002_SCENE_001')
+
+    await screen.findByText(/충북 충주시 중앙탑면 탑정안길 6/)
+    await user.click(screen.getByRole('button', { name: '메뉴' }))
+    await user.click(screen.getByRole('button', { name: 'EN' }))
+
+    expect(await screen.findByText(/Chungcheongbuk-do/)).toBeInTheDocument()
+    expect(screen.queryByText(/충북 충주시 중앙탑면 탑정안길 6/)).not.toBeInTheDocument()
+  })
+
   it('hides the image without crashing when the keyframe fails to load', async () => {
     vi.mocked(getSegmentByIdApi).mockResolvedValueOnce(makeSegment())
 
