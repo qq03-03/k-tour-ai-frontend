@@ -28,4 +28,16 @@ describe('segmentTranslations517', () => {
       }
     }
   })
+
+  it('ko.drama_title matches the canonical drama_title, since /api/segments filters by exact match', () => {
+    // DramaSection links to /search?drama=<localized ko drama_title>, and
+    // listSegmentsByDramaApi filters with `WHERE drama_title = %s` (exact,
+    // case- and space-sensitive) against the canonical value. Any spelling
+    // drift here silently zeroes out that drama's results.
+    for (const segment of rawSegments517) {
+      const keyframeId = `${segment.segment_id}__${segment.segment_id}`
+      const record = segmentTranslations517[keyframeId]
+      expect(record.ko.drama_title, keyframeId).toBe(segment.drama_title)
+    }
+  })
 })
