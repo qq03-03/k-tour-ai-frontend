@@ -29,10 +29,32 @@ describe('deriveRegionFilterFromQuery', () => {
     expect(deriveRegionFilterFromQuery('   ')).toBeNull()
   })
 
-  it('does not match a literal administrative region name that already exists on its own', () => {
-    // "경상북도" is already a real, exact region -- it should be sent as
-    // free-text query and let the backend match it directly, not rewritten
-    // through the colloquial-grouping path.
-    expect(deriveRegionFilterFromQuery('경상북도')).toBeNull()
+  it('hard-filters a literal administrative region name to itself', () => {
+    // The backend ranks free text by CLIP semantic similarity, not by an
+    // exact match on the region column -- so searching the literal region
+    // name "경상북도" without a hard filter can still surface other regions
+    // (e.g. Seoul) that score highly on semantic similarity. It must be
+    // hard-filtered to itself, the same as a colloquial grouping term.
+    expect(deriveRegionFilterFromQuery('경상북도')).toEqual(['경상북도'])
+  })
+
+  it('hard-filters the exact region name reported in the Seoul bug report', () => {
+    expect(deriveRegionFilterFromQuery('서울특별시')).toEqual(['서울특별시'])
+  })
+
+  it('hard-filters every canonical region name present in the dataset', () => {
+    const canonicalRegions = [
+      '서울특별시', '경기도', '인천광역시', '부산광역시', '대구광역시',
+      '경상북도', '경상남도', '전북특별자치도', '전라남도',
+      '충청북도', '충청남도', '강원특별자치도', '제주특별자치도',
+    ]
+    for (const region of canonicalRegions) {
+      expect(deriveRegionFilterFromQuery(region), region).toEqual([region])
+    }
+  })
+
+  it('hard-filters a common short form of a region name', () => {
+    expect(deriveRegionFilterFromQuery('서울 데이트 코스')).toEqual(['서울특별시'])
+    expect(deriveRegionFilterFromQuery('부산 여행지')).toEqual(['부산광역시'])
   })
 })
