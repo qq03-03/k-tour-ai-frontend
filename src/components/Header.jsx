@@ -53,7 +53,6 @@ export default function Header() {
         >
           <Link to="/" onClick={closeMenu}>{t('nav_home')}</Link>
           <Link to="/search" onClick={closeMenu}>{t('nav_search')}</Link>
-          <Link to="/about" onClick={closeMenu}>{t('nav_about')}</Link>
           <div style={{ display: 'flex', gap: 6, paddingTop: 10, borderTop: '1px solid #e2e8f0' }}>
             {LANGUAGE_OPTIONS.map((option) => (
               <button

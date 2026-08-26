@@ -22,7 +22,13 @@ describe('Header', () => {
     renderWithLanguage(<MemoryRouter><Header /></MemoryRouter>)
     await user.click(screen.getByRole('button', { name: '메뉴' }))
     expect(screen.getByRole('link', { name: '홈' })).toHaveAttribute('href', '/')
-    expect(screen.getByRole('link', { name: '소개' })).toHaveAttribute('href', '/about')
+  })
+
+  it('does not show a 소개 (about) link in the menu', async () => {
+    const user = userEvent.setup()
+    renderWithLanguage(<MemoryRouter><Header /></MemoryRouter>)
+    await user.click(screen.getByRole('button', { name: '메뉴' }))
+    expect(screen.queryByRole('link', { name: '소개' })).not.toBeInTheDocument()
   })
 
   it('switches nav labels to English when the EN button is clicked', async () => {
@@ -47,7 +53,7 @@ describe('Header', () => {
     const user = userEvent.setup()
     renderWithLanguage(<MemoryRouter><Header /></MemoryRouter>)
     await user.click(screen.getByRole('button', { name: '메뉴' }))
-    await user.click(screen.getByRole('link', { name: '소개' }))
-    expect(screen.queryByRole('link', { name: '소개' })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('link', { name: '홈' }))
+    expect(screen.queryByRole('link', { name: '홈' })).not.toBeInTheDocument()
   })
 })
