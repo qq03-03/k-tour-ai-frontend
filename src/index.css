@@ -55,9 +55,7 @@ a {
 
 /* Search results: the active filter summary is a mobile-only convenience
    (small screens have no room to keep the filter panel open, so a compact
-   summary above the results shows what's currently selected). On wider
-   screens the "☰ 검색 조건" toggle panel already shows the active
-   selections when reopened, so the summary would just be redundant. */
+   summary above the results shows what's currently selected). */
 .mobile-active-filters {
   display: block;
 }
@@ -65,5 +63,32 @@ a {
 @media (min-width: 900px) {
   .mobile-active-filters {
     display: none;
+  }
+}
+
+/* The on-page "☰ 검색 조건" toggle button is mobile's way into the filter
+   panel. Desktop reaches the same panel through the header's hamburger
+   menu instead (see .desktop-only-menu-item below and Header.jsx), so the
+   on-page button would just be a redundant second entry point there. */
+.mobile-only-filter-toggle {
+  display: block;
+}
+
+@media (min-width: 900px) {
+  .mobile-only-filter-toggle {
+    display: none;
+  }
+}
+
+/* The header's "검색 조건" hamburger-menu link opens the search filter
+   panel -- desktop-only, since mobile already has the dedicated on-page
+   toggle button above (.mobile-only-filter-toggle in SearchResults.jsx). */
+.desktop-only-menu-item {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .desktop-only-menu-item {
+    display: block;
   }
 }

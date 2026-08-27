@@ -56,4 +56,29 @@ describe('Header', () => {
     await user.click(screen.getByRole('link', { name: '홈' }))
     expect(screen.queryByRole('link', { name: '홈' })).not.toBeInTheDocument()
   })
+
+  it('shows a 검색 조건 link that opens the filter panel, going to a fresh /search when not already there', async () => {
+    const user = userEvent.setup()
+    renderWithLanguage(<MemoryRouter><Header /></MemoryRouter>)
+    await user.click(screen.getByRole('button', { name: '메뉴' }))
+    const link = screen.getByRole('link', { name: '검색 조건' })
+    const href = link.getAttribute('href')
+    expect(href.startsWith('/search?')).toBe(true)
+    expect(new URLSearchParams(href.split('?')[1]).get('openFilter')).toBeTruthy()
+  })
+
+  it('preserves the current search filters in the 검색 조건 link when already on /search', async () => {
+    const user = userEvent.setup()
+    renderWithLanguage(
+      <MemoryRouter initialEntries={['/search?seasons=summer&genres=horror']}>
+        <Header />
+      </MemoryRouter>,
+    )
+    await user.click(screen.getByRole('button', { name: '메뉴' }))
+    const link = screen.getByRole('link', { name: '검색 조건' })
+    const params = new URLSearchParams(link.getAttribute('href').split('?')[1])
+    expect(params.get('seasons')).toBe('summer')
+    expect(params.get('genres')).toBe('horror')
+    expect(params.get('openFilter')).toBeTruthy()
+  })
 })

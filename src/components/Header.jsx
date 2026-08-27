@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 const LANGUAGE_OPTIONS = [
@@ -12,10 +12,21 @@ const LANGUAGE_OPTIONS = [
 export default function Header() {
   const { lang, setLang, t } = useLanguage()
   const [menuOpen, setMenuOpen] = useState(false)
+  const location = useLocation()
 
   function closeMenu() {
     setMenuOpen(false)
   }
+
+  // Desktop's way into the search filter panel: a hamburger-menu link
+  // instead of the dedicated toggle button SearchResults shows on mobile
+  // (see .desktop-only-menu-item / .mobile-only-filter-toggle in
+  // index.css). Preserves whatever filters are already in the URL and
+  // adds a fresh openFilter signal each time so re-clicking always
+  // (re)opens the panel, even if the user had since closed it manually.
+  const filterPanelParams = new URLSearchParams(location.pathname === '/search' ? location.search : '')
+  filterPanelParams.set('openFilter', String(Date.now()))
+  const searchFiltersHref = `/search?${filterPanelParams.toString()}`
 
   return (
     <header style={{ position: 'relative', background: '#fff' }}>
@@ -53,6 +64,9 @@ export default function Header() {
         >
           <Link to="/" onClick={closeMenu}>{t('nav_home')}</Link>
           <Link to="/search" onClick={closeMenu}>{t('nav_search')}</Link>
+          <Link to={searchFiltersHref} onClick={closeMenu} className="desktop-only-menu-item">
+            {t('filter_toggle')}
+          </Link>
           <div style={{ display: 'flex', gap: 6, paddingTop: 10, borderTop: '1px solid #e2e8f0' }}>
             {LANGUAGE_OPTIONS.map((option) => (
               <button

@@ -60,6 +60,15 @@ export default function SearchResults() {
   const isBrowsing = Boolean(season || rawThemeId || hasCombinedFilters)
   const isDramaBrowsing = Boolean(dramaTitle)
 
+  // Desktop opens the filter panel from the header's hamburger menu (see
+  // Header.jsx) instead of the on-page toggle button mobile uses. That link
+  // sets a fresh openFilter value every time, so this fires (and reopens
+  // the panel) even if the user had since closed it manually.
+  const openFilterSignal = searchParams.get('openFilter')
+  useEffect(() => {
+    if (openFilterSignal) setIsFilterPanelOpen(true)
+  }, [openFilterSignal])
+
   useEffect(() => {
     let cancelled = false
 
@@ -212,7 +221,7 @@ export default function SearchResults() {
       <div style={{ padding: '16px 24px' }}>
         <SearchBar initialValue={query} onSearch={handleSearch} />
       </div>
-      <div style={{ padding: '0 24px 8px' }}>
+      <div className="mobile-only-filter-toggle" style={{ padding: '0 24px 8px' }}>
         <button
           onClick={() => setIsFilterPanelOpen((v) => !v)}
           style={{ background: '#EFF6FF', color: 'var(--color-primary)', border: 'none', borderRadius: 20, padding: '8px 16px', fontSize: 12.5, fontWeight: 700 }}

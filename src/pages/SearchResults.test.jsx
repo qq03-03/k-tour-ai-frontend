@@ -423,6 +423,14 @@ describe('SearchResults', () => {
       expect(screen.queryByText('선택 조건으로 찾기')).not.toBeInTheDocument()
     })
 
+    it('opens the panel when the URL carries an openFilter signal (desktop entry via the header hamburger menu)', async () => {
+      vi.mocked(searchSegmentsApi).mockResolvedValueOnce([])
+
+      renderAt('/search?seasons=summer&openFilter=1735689600000')
+
+      expect(await screen.findByText('선택 조건으로 찾기')).toBeInTheDocument()
+    })
+
     it('applying the panel navigates to a combined-filter URL and searches with season+theme+drama_title', async () => {
       const user = userEvent.setup()
       vi.mocked(searchSegmentsApi).mockResolvedValue([])
