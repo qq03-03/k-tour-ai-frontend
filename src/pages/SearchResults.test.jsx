@@ -131,6 +131,27 @@ describe('SearchResults', () => {
     expect(screen.queryByText('검색 중이에요...')).not.toBeInTheDocument()
   })
 
+  it('does not flash "검색 결과 0건" in the count badge while a search is still loading', async () => {
+    // Regression test: the count badge used to read straight from `results`
+    // (which starts at []), rendering unconditionally regardless of
+    // isLoading -- so on first load it briefly said "검색 결과 0건" even
+    // though the request hadn't come back yet.
+    let resolve
+    const apiPromise = new Promise((r) => {
+      resolve = r
+    })
+
+    vi.mocked(searchSegmentsApi).mockReturnValueOnce(apiPromise)
+
+    renderAt('/search?q=test')
+
+    expect(screen.queryByText('검색 결과 0건')).not.toBeInTheDocument()
+
+    resolve([makeSegment({ place_name: '테스트 검색 결과' })])
+
+    expect(await screen.findByText('검색 결과 1건')).toBeInTheDocument()
+  })
+
   it('filters by season from the URL and sends the season filter to the API', async () => {
     vi.mocked(searchSegmentsApi).mockResolvedValueOnce([makeSegment({ place_id: 'P001' })])
 

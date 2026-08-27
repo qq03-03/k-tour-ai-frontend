@@ -136,7 +136,9 @@ export default function SearchResults() {
         <SearchBar initialValue={query} onSearch={handleSearch} />
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 24px' }}>
-        <span style={{ fontSize: 12.5, color: '#64748b' }}>{t('results_count', { n: displayResults.length })}</span>
+        <span style={{ fontSize: 12.5, color: '#64748b' }}>
+          {isLoading ? '' : t('results_count', { n: displayResults.length })}
+        </span>
         <button
           onClick={() => setShowMap((v) => !v)}
           style={{ background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: 20, padding: '8px 16px', fontSize: 12.5, fontWeight: 700 }}
