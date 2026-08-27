@@ -291,6 +291,33 @@ describe('SearchResults', () => {
     expect(await screen.findByText(/검색 결과를 불러오지 못했어요/)).toBeInTheDocument()
   })
 
+  it('shows a trailer panel with a new-tab YouTube link when browsing a drama with known trailer data', async () => {
+    vi.mocked(listSegmentsByDramaApi).mockResolvedValueOnce([
+      makeSegment({ drama_title: '호텔 델루나' }),
+    ])
+
+    renderAt(`/search?drama=${encodeURIComponent('호텔 델루나')}`)
+
+    await screen.findByText('테스트 장소')
+
+    expect(screen.getByRole('heading', { name: '호텔 델루나' })).toBeInTheDocument()
+    const trailerLink = screen.getByRole('link', { name: /예고편/ })
+    expect(trailerLink).toHaveAttribute('href', 'https://www.youtube.com/watch?v=wi6kzEHVqRk')
+    expect(trailerLink).toHaveAttribute('target', '_blank')
+  })
+
+  it('does not show a trailer panel when browsing a drama with no trailer data', async () => {
+    vi.mocked(listSegmentsByDramaApi).mockResolvedValueOnce([
+      makeSegment({ drama_title: '테스트 드라마' }),
+    ])
+
+    renderAt(`/search?drama=${encodeURIComponent('테스트 드라마')}`)
+
+    await screen.findByText('테스트 장소')
+
+    expect(screen.queryByRole('link', { name: /예고편/ })).not.toBeInTheDocument()
+  })
+
   it('does not dedupe by place for a plain text search with no season filter', async () => {
     vi.mocked(searchSegmentsApi).mockResolvedValueOnce([
       makeSegment({ uid: 'a', segment_id: 'a', place_id: 'P001' }),

@@ -15,6 +15,7 @@ import { dedupeByPlace } from '../lib/dedupeByPlace.js'
 import { dedupeByDrama } from '../lib/dedupeByDrama.js'
 import { getMapMarkers } from '../lib/getMapMarkers.js'
 import { localizeSegment } from '../lib/localizeSegment.js'
+import { getDramaTrailer } from '../lib/getDramaTrailer.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 export default function SearchResults() {
@@ -124,10 +125,21 @@ export default function SearchResults() {
       ? dedupeByDrama(dedupeByPlace(results))
       : results
   const localizedResults = displayResults.map((segment) => localizeSegment(segment, lang))
+  const trailer = isDramaBrowsing ? getDramaTrailer(dramaTitle) : null
 
   function handleSearch(newQuery) {
     navigate(`/search?q=${encodeURIComponent(newQuery)}`)
   }
+
+  const resultsListContent = isLoading ? (
+    <p style={{ textAlign: 'center', color: '#94a3b8' }}>{t('search_loading_message')}</p>
+  ) : error ? (
+    <EmptyState message={error} />
+  ) : localizedResults.length === 0 ? (
+    <EmptyState message={t('empty_results_message')} />
+  ) : (
+    localizedResults.map((segment) => <ResultCard key={segment.uid} segment={segment} />)
+  )
 
   return (
     <div>
@@ -151,17 +163,27 @@ export default function SearchResults() {
           <KakaoMap markers={getMapMarkers(displayResults, placeCoordinates)} />
         </div>
       )}
-      <div style={{ padding: '14px 24px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {isLoading ? (
-          <p style={{ textAlign: 'center', color: '#94a3b8' }}>{t('search_loading_message')}</p>
-        ) : error ? (
-          <EmptyState message={error} />
-        ) : localizedResults.length === 0 ? (
-          <EmptyState message={t('empty_results_message')} />
-        ) : (
-          localizedResults.map((segment) => <ResultCard key={segment.uid} segment={segment} />)
-        )}
-      </div>
+      {trailer ? (
+        <div style={{ padding: '14px 24px 24px', display: 'flex', gap: 24 }}>
+          <div style={{ flex: '0 0 280px' }}>
+            <h2 style={{ fontSize: 26, fontWeight: 800, margin: '0 0 12px' }}>{dramaTitle}</h2>
+            <a href={trailer.watchUrl} target="_blank" rel="noreferrer">
+              <img
+                src={trailer.thumbnailUrl}
+                alt={`${dramaTitle} 예고편 보기`}
+                style={{ width: '100%', borderRadius: 12, display: 'block' }}
+              />
+            </a>
+          </div>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {resultsListContent}
+          </div>
+        </div>
+      ) : (
+        <div style={{ padding: '14px 24px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {resultsListContent}
+        </div>
+      )}
       <Footer />
     </div>
   )
