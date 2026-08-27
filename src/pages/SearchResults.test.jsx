@@ -407,4 +407,71 @@ describe('SearchResults', () => {
 
     expect(await screen.findByText('Gochang Hakwon Farm')).toBeInTheDocument()
   })
+
+  describe('combined filter panel', () => {
+    it('toggles the filter panel open and closed', async () => {
+      const user = userEvent.setup()
+      vi.mocked(searchSegmentsApi).mockResolvedValueOnce([])
+      renderAt('/search?q=test')
+
+      expect(screen.queryByText('선택 조건으로 찾기')).not.toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: '☰ 검색 조건' }))
+      expect(screen.getByText('선택 조건으로 찾기')).toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: '닫기' }))
+      expect(screen.queryByText('선택 조건으로 찾기')).not.toBeInTheDocument()
+    })
+
+    it('applying the panel navigates to a combined-filter URL and searches with season+theme+drama_title', async () => {
+      const user = userEvent.setup()
+      vi.mocked(searchSegmentsApi).mockResolvedValue([])
+
+      renderAt('/search')
+      await user.click(screen.getByRole('button', { name: '☰ 검색 조건' }))
+
+      await user.click(screen.getByLabelText('여름'))
+      await user.click(screen.getByLabelText('야경'))
+      await user.click(screen.getByLabelText('선재 업고 튀어'))
+      await user.click(screen.getByRole('button', { name: '선택 조건으로 찾기' }))
+
+      await waitFor(() => {
+        expect(searchSegmentsApi).toHaveBeenCalledWith({
+          query: '',
+          filters: {
+            season: ['summer'],
+            theme: ['night_view'],
+            drama_title: ['선재 업고 튀어'],
+          },
+        })
+      })
+    })
+
+    it('a genre selection resolves to its matching drama titles as a drama_title filter', async () => {
+      const user = userEvent.setup()
+      vi.mocked(searchSegmentsApi).mockResolvedValue([])
+
+      renderAt('/search')
+      await user.click(screen.getByRole('button', { name: '☰ 검색 조건' }))
+      await user.click(screen.getByLabelText('공포'))
+      await user.click(screen.getByRole('button', { name: '선택 조건으로 찾기' }))
+
+      await waitFor(() => {
+        expect(searchSegmentsApi).toHaveBeenCalledWith({
+          query: '',
+          filters: { drama_title: ['악귀'] },
+        })
+      })
+    })
+
+    it('shows a summary of the active filters from the URL above the results', async () => {
+      vi.mocked(searchSegmentsApi).mockResolvedValueOnce([])
+
+      renderAt('/search?seasons=summer&themes=night_view&dramas=선재%20업고%20튀어')
+
+      expect(await screen.findByText(/여름/)).toBeInTheDocument()
+      expect(screen.getByText(/야경/)).toBeInTheDocument()
+      expect(screen.getByText(/선재 업고 튀어/)).toBeInTheDocument()
+    })
+  })
 })

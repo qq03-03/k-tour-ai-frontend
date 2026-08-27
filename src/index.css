@@ -52,3 +52,18 @@ a {
     height: auto;
   }
 }
+
+/* Search results: the active filter summary is a mobile-only convenience
+   (small screens have no room to keep the filter panel open, so a compact
+   summary above the results shows what's currently selected). On wider
+   screens the "☰ 검색 조건" toggle panel already shows the active
+   selections when reopened, so the summary would just be redundant. */
+.mobile-active-filters {
+  display: block;
+}
+
+@media (min-width: 900px) {
+  .mobile-active-filters {
+    display: none;
+  }
+}
