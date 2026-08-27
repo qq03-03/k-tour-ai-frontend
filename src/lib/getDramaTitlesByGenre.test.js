@@ -2,14 +2,14 @@ import { describe, it, expect } from 'vitest'
 import { getDramaTitlesByGenre } from './getDramaTitlesByGenre.js'
 
 describe('getDramaTitlesByGenre', () => {
-  it('returns every drama title tagged with any of the requested genres (OR)', () => {
-    const titles = getDramaTitlesByGenre(['공포'])
+  it('returns every drama title tagged with any of the requested genre ids (OR)', () => {
+    const titles = getDramaTitlesByGenre(['horror'])
     expect(titles).toContain('악귀')
     expect(titles).not.toContain('사랑의 불시착')
   })
 
-  it('unions titles across multiple requested genres without duplicates', () => {
-    const titles = getDramaTitlesByGenre(['공포', '판타지'])
+  it('unions titles across multiple requested genre ids without duplicates', () => {
+    const titles = getDramaTitlesByGenre(['horror', 'fantasy'])
     expect(titles).toContain('악귀')
     expect(titles).toContain('도깨비')
     expect(new Set(titles).size).toBe(titles.length)

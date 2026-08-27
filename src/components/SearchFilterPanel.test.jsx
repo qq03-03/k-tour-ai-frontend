@@ -34,7 +34,7 @@ describe('SearchFilterPanel', () => {
   })
 
   it('pre-checks the boxes matching the current selection', () => {
-    setup({ seasons: ['summer'], themeIds: ['flower'], genres: ['공포'] })
+    setup({ seasons: ['summer'], themeIds: ['flower'], genres: ['horror'] })
     expect(screen.getByLabelText('여름')).toBeChecked()
     expect(screen.getByLabelText('꽃')).toBeChecked()
     expect(screen.getByLabelText('공포')).toBeChecked()
@@ -53,7 +53,7 @@ describe('SearchFilterPanel', () => {
     expect(onApply).toHaveBeenCalledWith({
       seasons: ['summer'],
       themeIds: ['night_view'],
-      genres: ['공포'],
+      genres: ['horror'],
       dramas: [],
     })
   })

@@ -18,6 +18,7 @@ import { getMapMarkers } from '../lib/getMapMarkers.js'
 import { localizeSegment } from '../lib/localizeSegment.js'
 import { getDramaTrailer } from '../lib/getDramaTrailer.js'
 import { getDramaTitlesByGenre } from '../lib/getDramaTitlesByGenre.js'
+import { genres } from '../data/dramaGenres.js'
 import SearchFilterPanel from '../components/SearchFilterPanel.jsx'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
@@ -188,7 +189,10 @@ export default function SearchResults() {
   const activeFilterSummary = [
     ...selectedSeasons.map((id) => seasons.find((s) => s.id === id)?.label[lang] || id),
     ...selectedThemeIds.map((id) => themes.find((t2) => t2.id === id)?.label[lang] || id),
-    ...selectedGenres,
+    ...selectedGenres.map((id) => {
+      const genre = genres.find((g) => g.id === id)
+      return genre ? t(genre.labelKey) : id
+    }),
     ...selectedDramas,
   ].join(' · ')
 
@@ -213,7 +217,7 @@ export default function SearchResults() {
           onClick={() => setIsFilterPanelOpen((v) => !v)}
           style={{ background: '#EFF6FF', color: 'var(--color-primary)', border: 'none', borderRadius: 20, padding: '8px 16px', fontSize: 12.5, fontWeight: 700 }}
         >
-          ☰ 검색 조건
+          ☰ {t('filter_toggle')}
         </button>
       </div>
       {isFilterPanelOpen && (
