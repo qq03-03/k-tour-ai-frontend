@@ -1,13 +1,42 @@
 import { useState } from 'react'
 import { seasons } from '../data/seasons.js'
 import { themes } from '../data/themes.js'
-import { dramaGenres, genres } from '../data/dramaGenres.js'
+import { genres } from '../data/dramaGenres.js'
+import { mockSegments } from '../data/mockSegments.js'
+import { getFeaturedDramas } from '../lib/getFeaturedDramas.js'
+import { deriveDramaImagePath } from '../lib/deriveDramaImagePath.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
-const allDramaTitles = Object.keys(dramaGenres)
+// Same one-card-per-drama_title source DramaSection.jsx uses on the home
+// page, reused here so the drama picker can show the same cover images.
+const allDramas = getFeaturedDramas(mockSegments, Infinity)
 
 function toggle(list, value) {
   return list.includes(value) ? list.filter((item) => item !== value) : [...list, value]
+}
+
+// Matches SeasonSection.jsx/ThemeSection.jsx's home-page pill style, made
+// multi-select (aria-pressed instead of a single selectedId).
+function PillButton({ active, onClick, children }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      style={{
+        background: active ? 'var(--color-primary)' : '#EFF6FF',
+        color: active ? 'white' : 'var(--color-primary)',
+        border: 'none',
+        borderRadius: 20,
+        padding: '8px 14px',
+        fontSize: 12.5,
+        fontWeight: 600,
+        cursor: 'pointer',
+      }}
+    >
+      {children}
+    </button>
+  )
 }
 
 export default function SearchFilterPanel({ seasons: selectedSeasons, themeIds, genres: selectedGenres, dramas, onApply, onClose }) {
@@ -18,7 +47,7 @@ export default function SearchFilterPanel({ seasons: selectedSeasons, themeIds, 
   const [draftDramas, setDraftDramas] = useState(dramas)
   const [dramaSearch, setDramaSearch] = useState('')
 
-  const visibleDramaTitles = allDramaTitles.filter((title) => title.includes(dramaSearch))
+  const visibleDramas = allDramas.filter((drama) => drama.drama_title.includes(dramaSearch))
 
   function handleApply() {
     onApply({ seasons: draftSeasons, themeIds: draftThemeIds, genres: draftGenres, dramas: draftDramas })
@@ -37,14 +66,13 @@ export default function SearchFilterPanel({ seasons: selectedSeasons, themeIds, 
         <h4 style={{ fontSize: 13, margin: '0 0 8px' }}>{t('filter_season')}</h4>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
           {seasons.map((season) => (
-            <label key={season.id} style={{ fontSize: 12.5, display: 'flex', alignItems: 'center', gap: 4 }}>
-              <input
-                type="checkbox"
-                checked={draftSeasons.includes(season.id)}
-                onChange={() => setDraftSeasons((current) => toggle(current, season.id))}
-              />
-              {season.label[lang]}
-            </label>
+            <PillButton
+              key={season.id}
+              active={draftSeasons.includes(season.id)}
+              onClick={() => setDraftSeasons((current) => toggle(current, season.id))}
+            >
+              <span aria-hidden="true">{season.icon}</span> {season.label[lang]}
+            </PillButton>
           ))}
         </div>
       </section>
@@ -53,14 +81,13 @@ export default function SearchFilterPanel({ seasons: selectedSeasons, themeIds, 
         <h4 style={{ fontSize: 13, margin: '0 0 8px' }}>{t('filter_theme')}</h4>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
           {themes.map((theme) => (
-            <label key={theme.id} style={{ fontSize: 12.5, display: 'flex', alignItems: 'center', gap: 4 }}>
-              <input
-                type="checkbox"
-                checked={draftThemeIds.includes(theme.id)}
-                onChange={() => setDraftThemeIds((current) => toggle(current, theme.id))}
-              />
-              {theme.label[lang]}
-            </label>
+            <PillButton
+              key={theme.id}
+              active={draftThemeIds.includes(theme.id)}
+              onClick={() => setDraftThemeIds((current) => toggle(current, theme.id))}
+            >
+              <span aria-hidden="true">{theme.icon}</span> {theme.label[lang]}
+            </PillButton>
           ))}
         </div>
       </section>
@@ -69,14 +96,13 @@ export default function SearchFilterPanel({ seasons: selectedSeasons, themeIds, 
         <h4 style={{ fontSize: 13, margin: '0 0 8px' }}>{t('filter_genre')}</h4>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
           {genres.map((genre) => (
-            <label key={genre.id} style={{ fontSize: 12.5, display: 'flex', alignItems: 'center', gap: 4 }}>
-              <input
-                type="checkbox"
-                checked={draftGenres.includes(genre.id)}
-                onChange={() => setDraftGenres((current) => toggle(current, genre.id))}
-              />
+            <PillButton
+              key={genre.id}
+              active={draftGenres.includes(genre.id)}
+              onClick={() => setDraftGenres((current) => toggle(current, genre.id))}
+            >
               {t(genre.labelKey)}
-            </label>
+            </PillButton>
           ))}
         </div>
       </section>
@@ -88,19 +114,37 @@ export default function SearchFilterPanel({ seasons: selectedSeasons, themeIds, 
           placeholder={t('filter_drama_search_placeholder')}
           value={dramaSearch}
           onChange={(event) => setDramaSearch(event.target.value)}
-          style={{ width: '100%', padding: '6px 10px', borderRadius: 8, border: '1px solid #e2e8f0', marginBottom: 8, fontSize: 12.5 }}
+          style={{ width: '100%', padding: '6px 10px', borderRadius: 8, border: '1px solid #e2e8f0', marginBottom: 10, fontSize: 12.5 }}
         />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: 160, overflowY: 'auto' }}>
-          {visibleDramaTitles.map((title) => (
-            <label key={title} style={{ fontSize: 12.5, display: 'flex', alignItems: 'center', gap: 4 }}>
-              <input
-                type="checkbox"
-                checked={draftDramas.includes(title)}
-                onChange={() => setDraftDramas((current) => toggle(current, title))}
-              />
-              {title}
-            </label>
-          ))}
+        <div style={{ display: 'flex', gap: 12, overflowX: 'auto', paddingBottom: 8 }}>
+          {visibleDramas.map((drama) => {
+            const active = draftDramas.includes(drama.drama_title)
+            return (
+              <button
+                key={drama.drama_title}
+                type="button"
+                aria-pressed={active}
+                onClick={() => setDraftDramas((current) => toggle(current, drama.drama_title))}
+                style={{
+                  flex: '0 0 96px',
+                  border: active ? '3px solid var(--color-primary)' : '3px solid transparent',
+                  borderRadius: 16,
+                  padding: 0,
+                  background: 'none',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <img
+                  src={`${import.meta.env.BASE_URL}${deriveDramaImagePath(drama.video_id) || drama.keyframe_path}`}
+                  alt=""
+                  onError={(event) => { event.currentTarget.style.visibility = 'hidden' }}
+                  style={{ width: '100%', height: 60, objectFit: 'cover', borderRadius: 12, background: '#e2e8f0', display: 'block' }}
+                />
+                <p style={{ fontSize: 11, margin: '6px 0 0', fontWeight: 600, color: 'var(--color-text)' }}>{drama.drama_title}</p>
+              </button>
+            )
+          })}
         </div>
       </section>
 

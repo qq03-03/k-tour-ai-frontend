@@ -438,9 +438,9 @@ describe('SearchResults', () => {
       renderAt('/search')
       await user.click(screen.getByRole('button', { name: '☰ 검색 조건' }))
 
-      await user.click(screen.getByLabelText('여름'))
-      await user.click(screen.getByLabelText('야경'))
-      await user.click(screen.getByLabelText('선재 업고 튀어'))
+      await user.click(screen.getByRole('button', { name: '여름' }))
+      await user.click(screen.getByRole('button', { name: '야경' }))
+      await user.click(screen.getByRole('button', { name: '선재 업고 튀어' }))
       await user.click(screen.getByRole('button', { name: '선택 조건으로 찾기' }))
 
       await waitFor(() => {
@@ -461,7 +461,7 @@ describe('SearchResults', () => {
 
       renderAt('/search')
       await user.click(screen.getByRole('button', { name: '☰ 검색 조건' }))
-      await user.click(screen.getByLabelText('공포'))
+      await user.click(screen.getByRole('button', { name: '공포' }))
       await user.click(screen.getByRole('button', { name: '선택 조건으로 찾기' }))
 
       await waitFor(() => {
