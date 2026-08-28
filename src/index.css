@@ -37,6 +37,12 @@ a {
 
 .detail-media-row__image {
   aspect-ratio: 1 / 1;
+  /* .detail-media-row sets align-items: stretch for the two-column desktop
+     layout, which fights aspect-ratio for this item's height (stretch
+     wants to fill the row; aspect-ratio wants width/1). Opting this one
+     item out of stretch lets aspect-ratio win, so it always stays square
+     regardless of how tall the map card next to it happens to be. */
+  align-self: start;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 4px 14px rgba(15, 23, 42, .05);
