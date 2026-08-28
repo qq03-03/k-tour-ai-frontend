@@ -263,8 +263,20 @@ export default function SearchResults() {
         </div>
       )}
       {showBrowsingSummary && (
-        <div style={{ padding: '0 24px 8px', fontSize: 12, color: '#64748b' }}>
-          {browsingSummary}
+        <div style={{ padding: '0 24px 12px' }}>
+          <span
+            style={{
+              display: 'inline-block',
+              background: 'var(--color-primary)',
+              color: 'white',
+              fontSize: 14,
+              fontWeight: 700,
+              borderRadius: 20,
+              padding: '8px 16px',
+            }}
+          >
+            {browsingSummary}
+          </span>
         </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 24px' }}>

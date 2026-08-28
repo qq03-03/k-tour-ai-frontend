@@ -17,11 +17,20 @@ const segment = {
 }
 
 describe('ResultCard', () => {
-  it('renders the place name, drama title, and similarity percentage', () => {
+  it('renders the place name and drama title', () => {
     render(<MemoryRouter><ResultCard segment={segment} /></MemoryRouter>)
     expect(screen.getByText('seaside')).toBeInTheDocument()
     expect(screen.getByText(/도깨비/)).toBeInTheDocument()
-    expect(screen.getByText('92%')).toBeInTheDocument()
+  })
+
+  it('does not show a similarity percentage badge', () => {
+    // The score badge always read 100% for theme/season/drama browsing
+    // (backend returns a synthetic 0.0 for those, and this card rounded
+    // any input to a percent), so it looked like a real relevance ranking
+    // when it wasn't one -- misleading rather than informative.
+    render(<MemoryRouter><ResultCard segment={segment} /></MemoryRouter>)
+    expect(screen.queryByText('92%')).not.toBeInTheDocument()
+    expect(screen.queryByText(/%/)).not.toBeInTheDocument()
   })
 
   it('resolves the image src under the configured base path', () => {
