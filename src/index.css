@@ -47,10 +47,6 @@ a {
     grid-template-columns: 1fr 1fr;
     align-items: stretch;
   }
-
-  .detail-media-row__image {
-    height: auto;
-  }
 }
 
 /* The on-page "☰ 검색 조건" toggle button is mobile's way into the filter
