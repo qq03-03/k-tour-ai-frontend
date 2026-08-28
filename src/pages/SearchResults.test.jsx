@@ -481,5 +481,30 @@ describe('SearchResults', () => {
       expect(screen.getByText(/야경/)).toBeInTheDocument()
       expect(screen.getByText(/선재 업고 튀어/)).toBeInTheDocument()
     })
+
+    it('a region selection is sent as a region filter alongside the other combined filters', async () => {
+      const user = userEvent.setup()
+      vi.mocked(searchSegmentsApi).mockResolvedValue([])
+
+      renderAt('/search')
+      await user.click(screen.getByRole('button', { name: '☰ 검색 조건' }))
+      await user.click(screen.getByRole('button', { name: '서울특별시' }))
+      await user.click(screen.getByRole('button', { name: '선택 조건으로 찾기' }))
+
+      await waitFor(() => {
+        expect(searchSegmentsApi).toHaveBeenCalledWith({
+          query: '',
+          filters: { region: ['서울특별시'] },
+        })
+      })
+    })
+
+    it('includes the selected region in the active filter summary', async () => {
+      vi.mocked(searchSegmentsApi).mockResolvedValueOnce([])
+
+      renderAt('/search?regions=서울특별시')
+
+      expect(await screen.findByText(/서울특별시/)).toBeInTheDocument()
+    })
   })
 })

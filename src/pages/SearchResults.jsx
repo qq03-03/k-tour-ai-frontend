@@ -20,6 +20,7 @@ import { getDramaTrailer } from '../lib/getDramaTrailer.js'
 import { getDramaTitlesByGenre } from '../lib/getDramaTitlesByGenre.js'
 import { localizeDramaTitle } from '../lib/localizeDramaTitle.js'
 import { genres } from '../data/dramaGenres.js'
+import { regions } from '../data/regions.js'
 import SearchFilterPanel from '../components/SearchFilterPanel.jsx'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
@@ -49,13 +50,15 @@ export default function SearchResults() {
   const rawSeasonsParam = searchParams.get('seasons') || ''
   const rawThemesParam = searchParams.get('themes') || ''
   const rawGenresParam = searchParams.get('genres') || ''
+  const rawRegionsParam = searchParams.get('regions') || ''
   const rawDramasParam = searchParams.get('dramas') || ''
   const selectedSeasons = splitParam(rawSeasonsParam)
   const selectedThemeIds = splitParam(rawThemesParam)
   const selectedGenres = splitParam(rawGenresParam)
+  const selectedRegions = splitParam(rawRegionsParam)
   const selectedDramas = splitParam(rawDramasParam)
   const hasCombinedFilters = Boolean(
-    selectedSeasons.length || selectedThemeIds.length || selectedGenres.length || selectedDramas.length,
+    selectedSeasons.length || selectedThemeIds.length || selectedGenres.length || selectedRegions.length || selectedDramas.length,
   )
 
   const isBrowsing = Boolean(season || rawThemeId || hasCombinedFilters)
@@ -104,6 +107,7 @@ export default function SearchResults() {
           const filters = {
             ...(selectedSeasons.length ? { season: selectedSeasons } : {}),
             ...(selectedThemeIds.length ? { theme: selectedThemeIds } : {}),
+            ...(selectedRegions.length ? { region: selectedRegions } : {}),
             ...(dramaTitles.length ? { drama_title: dramaTitles } : {}),
           }
           const searchResults = await searchSegmentsApi({ query: '', filters })
@@ -172,7 +176,7 @@ export default function SearchResults() {
 
     run()
     return () => { cancelled = true }
-  }, [query, season, rawThemeId, dramaTitle, rawSeasonsParam, rawThemesParam, rawGenresParam, rawDramasParam])
+  }, [query, season, rawThemeId, dramaTitle, rawSeasonsParam, rawThemesParam, rawGenresParam, rawRegionsParam, rawDramasParam])
 
   const displayResults = isDramaBrowsing
     ? dedupeByPlace(results)
@@ -186,11 +190,12 @@ export default function SearchResults() {
     navigate(`/search?q=${encodeURIComponent(newQuery)}`)
   }
 
-  function handleApplyFilters({ seasons: nextSeasons, themeIds: nextThemeIds, genres: nextGenres, dramas: nextDramas }) {
+  function handleApplyFilters({ seasons: nextSeasons, themeIds: nextThemeIds, genres: nextGenres, regions: nextRegions, dramas: nextDramas }) {
     const params = new URLSearchParams()
     if (nextSeasons.length) params.set('seasons', nextSeasons.join(','))
     if (nextThemeIds.length) params.set('themes', nextThemeIds.join(','))
     if (nextGenres.length) params.set('genres', nextGenres.join(','))
+    if (nextRegions.length) params.set('regions', nextRegions.join(','))
     if (nextDramas.length) params.set('dramas', nextDramas.join(','))
     navigate(`/search?${params.toString()}`)
     setIsFilterPanelOpen(false)
@@ -203,6 +208,7 @@ export default function SearchResults() {
       const genre = genres.find((g) => g.id === id)
       return genre ? t(genre.labelKey) : id
     }),
+    ...selectedRegions.map((id) => regions.find((r) => r.id === id)?.label[lang] || id),
     ...selectedDramas.map((title) => localizeDramaTitle(title, lang)),
   ].join(' · ')
 
@@ -236,6 +242,7 @@ export default function SearchResults() {
             seasons={selectedSeasons}
             themeIds={selectedThemeIds}
             genres={selectedGenres}
+            regions={selectedRegions}
             dramas={selectedDramas}
             onApply={handleApplyFilters}
             onClose={() => setIsFilterPanelOpen(false)}

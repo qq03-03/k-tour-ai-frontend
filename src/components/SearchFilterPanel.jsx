@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { seasons } from '../data/seasons.js'
 import { themes } from '../data/themes.js'
 import { genres } from '../data/dramaGenres.js'
+import { regions } from '../data/regions.js'
 import { mockSegments } from '../data/mockSegments.js'
 import { getFeaturedDramas } from '../lib/getFeaturedDramas.js'
 import { deriveDramaImagePath } from '../lib/deriveDramaImagePath.js'
@@ -40,18 +41,19 @@ function PillButton({ active, onClick, children }) {
   )
 }
 
-export default function SearchFilterPanel({ seasons: selectedSeasons, themeIds, genres: selectedGenres, dramas, onApply, onClose }) {
+export default function SearchFilterPanel({ seasons: selectedSeasons, themeIds, genres: selectedGenres, regions: selectedRegions, dramas, onApply, onClose }) {
   const { lang, t } = useLanguage()
   const [draftSeasons, setDraftSeasons] = useState(selectedSeasons)
   const [draftThemeIds, setDraftThemeIds] = useState(themeIds)
   const [draftGenres, setDraftGenres] = useState(selectedGenres)
+  const [draftRegions, setDraftRegions] = useState(selectedRegions)
   const [draftDramas, setDraftDramas] = useState(dramas)
   const [dramaSearch, setDramaSearch] = useState('')
 
   const visibleDramas = allDramas.filter((drama) => drama.drama_title.includes(dramaSearch))
 
   function handleApply() {
-    onApply({ seasons: draftSeasons, themeIds: draftThemeIds, genres: draftGenres, dramas: draftDramas })
+    onApply({ seasons: draftSeasons, themeIds: draftThemeIds, genres: draftGenres, regions: draftRegions, dramas: draftDramas })
   }
 
   return (
@@ -103,6 +105,21 @@ export default function SearchFilterPanel({ seasons: selectedSeasons, themeIds, 
               onClick={() => setDraftGenres((current) => toggle(current, genre.id))}
             >
               {t(genre.labelKey)}
+            </PillButton>
+          ))}
+        </div>
+      </section>
+
+      <section style={{ marginBottom: 16 }}>
+        <h4 style={{ fontSize: 13, margin: '0 0 8px' }}>{t('filter_region')}</h4>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+          {regions.map((region) => (
+            <PillButton
+              key={region.id}
+              active={draftRegions.includes(region.id)}
+              onClick={() => setDraftRegions((current) => toggle(current, region.id))}
+            >
+              {region.label[lang]}
             </PillButton>
           ))}
         </div>

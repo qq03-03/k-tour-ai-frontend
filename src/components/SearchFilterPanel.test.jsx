@@ -12,6 +12,7 @@ function setup(props = {}) {
       seasons={[]}
       themeIds={[]}
       genres={[]}
+      regions={[]}
       dramas={[]}
       onApply={onApply}
       onClose={onClose}
@@ -22,15 +23,17 @@ function setup(props = {}) {
 }
 
 describe('SearchFilterPanel', () => {
-  it('renders season, theme, genre, and drama sections as home-screen-style pill/card buttons', () => {
+  it('renders season, theme, genre, region, and drama sections as home-screen-style pill/card buttons', () => {
     setup()
     expect(screen.getByText('계절')).toBeInTheDocument()
     expect(screen.getByText('테마')).toBeInTheDocument()
     expect(screen.getByText('장르')).toBeInTheDocument()
+    expect(screen.getByText('지역')).toBeInTheDocument()
     expect(screen.getByText('드라마·영화')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '여름' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '야경' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '공포' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: '서울특별시' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: '선재 업고 튀어' })).toBeInTheDocument()
   })
 
@@ -41,26 +44,29 @@ describe('SearchFilterPanel', () => {
   })
 
   it('marks the boxes matching the current selection as pressed', () => {
-    setup({ seasons: ['summer'], themeIds: ['flower'], genres: ['horror'] })
+    setup({ seasons: ['summer'], themeIds: ['flower'], genres: ['horror'], regions: ['서울특별시'] })
     expect(screen.getByRole('button', { name: '여름' })).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByRole('button', { name: '꽃' })).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByRole('button', { name: '공포' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getByRole('button', { name: '서울특별시' })).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByRole('button', { name: '봄' })).toHaveAttribute('aria-pressed', 'false')
   })
 
-  it('calls onApply with the selected season, theme, and genre ids when submitted', async () => {
+  it('calls onApply with the selected season, theme, genre, and region ids when submitted', async () => {
     const user = userEvent.setup()
     const { onApply } = setup()
 
     await user.click(screen.getByRole('button', { name: '여름' }))
     await user.click(screen.getByRole('button', { name: '야경' }))
     await user.click(screen.getByRole('button', { name: '공포' }))
+    await user.click(screen.getByRole('button', { name: '서울특별시' }))
     await user.click(screen.getByRole('button', { name: '선택 조건으로 찾기' }))
 
     expect(onApply).toHaveBeenCalledWith({
       seasons: ['summer'],
       themeIds: ['night_view'],
       genres: ['horror'],
+      regions: ['서울특별시'],
       dramas: [],
     })
   })
