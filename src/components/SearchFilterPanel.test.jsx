@@ -81,6 +81,29 @@ describe('SearchFilterPanel', () => {
     expect(onApply).toHaveBeenCalledWith(expect.objectContaining({ seasons: [] }))
   })
 
+  it('clears every selection back to unpressed when the reset button is clicked', async () => {
+    const user = userEvent.setup()
+    setup({ seasons: ['summer'], themeIds: ['night_view'], genres: ['horror'], regions: ['서울특별시'], dramas: ['선재 업고 튀어'] })
+
+    await user.click(screen.getByRole('button', { name: '초기화' }))
+
+    expect(screen.getByRole('button', { name: '여름' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByRole('button', { name: '야경' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByRole('button', { name: '공포' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByRole('button', { name: '서울특별시' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByRole('button', { name: '선재 업고 튀어' })).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('reset does not call onApply or onClose by itself', async () => {
+    const user = userEvent.setup()
+    const { onApply, onClose } = setup({ seasons: ['summer'] })
+
+    await user.click(screen.getByRole('button', { name: '초기화' }))
+
+    expect(onApply).not.toHaveBeenCalled()
+    expect(onClose).not.toHaveBeenCalled()
+  })
+
   it('filters the drama card list by the title search box', async () => {
     const user = userEvent.setup()
     setup()

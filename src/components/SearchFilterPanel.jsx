@@ -56,6 +56,15 @@ export default function SearchFilterPanel({ seasons: selectedSeasons, themeIds, 
     onApply({ seasons: draftSeasons, themeIds: draftThemeIds, genres: draftGenres, regions: draftRegions, dramas: draftDramas })
   }
 
+  function handleReset() {
+    setDraftSeasons([])
+    setDraftThemeIds([])
+    setDraftGenres([])
+    setDraftRegions([])
+    setDraftDramas([])
+    setDramaSearch('')
+  }
+
   return (
     <div style={{ background: 'white', borderRadius: 16, padding: '20px', boxShadow: '0 8px 24px rgba(15,23,42,.12)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -168,12 +177,20 @@ export default function SearchFilterPanel({ seasons: selectedSeasons, themeIds, 
         </div>
       </section>
 
-      <button
-        onClick={handleApply}
-        style={{ width: '100%', background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: 12, padding: '10px 16px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
-      >
-        {t('filter_apply')}
-      </button>
+      <div style={{ display: 'flex', gap: 10 }}>
+        <button
+          onClick={handleReset}
+          style={{ flex: '0 0 auto', background: '#EFF6FF', color: 'var(--color-primary)', border: 'none', borderRadius: 12, padding: '10px 16px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+        >
+          {t('filter_reset')}
+        </button>
+        <button
+          onClick={handleApply}
+          style={{ flex: 1, background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: 12, padding: '10px 16px', fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+        >
+          {t('filter_apply')}
+        </button>
+      </div>
     </div>
   )
 }
