@@ -24,6 +24,12 @@ describe('Header', () => {
     expect(screen.getByRole('link', { name: '홈' })).toHaveAttribute('href', '/')
   })
 
+  it('localizes the hamburger button aria-label instead of always saying "메뉴"', async () => {
+    window.localStorage.setItem('ktourai_lang', 'en')
+    renderWithLanguage(<MemoryRouter><Header /></MemoryRouter>)
+    expect(screen.getByRole('button', { name: 'Menu' })).toBeInTheDocument()
+  })
+
   it('does not show a 소개 (about) link in the menu', async () => {
     const user = userEvent.setup()
     renderWithLanguage(<MemoryRouter><Header /></MemoryRouter>)

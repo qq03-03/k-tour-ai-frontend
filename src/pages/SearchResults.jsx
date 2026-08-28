@@ -302,7 +302,7 @@ export default function SearchResults() {
             <a href={trailer.watchUrl} target="_blank" rel="noreferrer">
               <img
                 src={trailer.thumbnailUrl}
-                alt={`${localizeDramaTitle(dramaTitle, lang)} 예고편 보기`}
+                alt={t('trailer_watch_alt', { drama: localizeDramaTitle(dramaTitle, lang) })}
                 style={{ width: '100%', borderRadius: 12, display: 'block' }}
               />
             </a>

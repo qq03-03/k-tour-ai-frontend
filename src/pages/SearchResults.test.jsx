@@ -306,6 +306,25 @@ describe('SearchResults', () => {
     expect(trailerLink).toHaveAttribute('target', '_blank')
   })
 
+  it('localizes the trailer link accessible name instead of always appending Korean "예고편 보기"', async () => {
+    // Bug report: the drama title in the trailer thumbnail's alt text was
+    // localized, but the " 예고편 보기" suffix was a hardcoded Korean literal
+    // appended in every language -- so an English-mode screen reader still
+    // heard Korean words tacked onto the English drama title.
+    window.localStorage.setItem('ktourai_lang', 'en')
+    vi.mocked(listSegmentsByDramaApi).mockResolvedValueOnce([
+      makeSegment({ drama_title: '호텔 델루나' }),
+    ])
+
+    renderAt(`/search?drama=${encodeURIComponent('호텔 델루나')}`)
+
+    await screen.findByText('테스트 장소')
+
+    const trailerLink = screen.getByRole('link', { name: /Hotel del Luna/ })
+    const alt = trailerLink.querySelector('img').getAttribute('alt')
+    expect(alt).not.toMatch(/[가-힣]/)
+  })
+
   it('does not show a trailer panel when browsing a drama with no trailer data', async () => {
     vi.mocked(listSegmentsByDramaApi).mockResolvedValueOnce([
       makeSegment({ drama_title: '테스트 드라마' }),

@@ -50,7 +50,10 @@ export default function SearchFilterPanel({ seasons: selectedSeasons, themeIds, 
   const [draftDramas, setDraftDramas] = useState(dramas)
   const [dramaSearch, setDramaSearch] = useState('')
 
-  const visibleDramas = allDramas.filter((drama) => drama.drama_title.includes(dramaSearch))
+  // Match against the displayed (localized) title, not the raw Korean
+  // drama_title -- the card itself shows the translated name, so a
+  // non-Korean user typing exactly what they see on screen must find it.
+  const visibleDramas = allDramas.filter((drama) => localizeDramaTitle(drama.drama_title, lang).includes(dramaSearch))
 
   function handleApply() {
     onApply({ seasons: draftSeasons, themeIds: draftThemeIds, genres: draftGenres, regions: draftRegions, dramas: draftDramas })

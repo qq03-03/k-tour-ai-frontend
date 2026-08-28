@@ -37,7 +37,7 @@ export default function Header() {
         </Link>
         <button
           onClick={() => setMenuOpen((open) => !open)}
-          aria-label="메뉴"
+          aria-label={t('nav_menu')}
           aria-expanded={menuOpen}
           style={{ border: 'none', background: 'none', fontSize: 22, lineHeight: 1, padding: 4, cursor: 'pointer', color: 'var(--color-text)' }}
         >

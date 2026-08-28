@@ -117,6 +117,22 @@ describe('SearchFilterPanel', () => {
     expect(screen.queryByRole('button', { name: '선재 업고 튀어' })).not.toBeInTheDocument()
   })
 
+  it('filters the drama card list by the displayed (localized) title, not just the raw Korean title', async () => {
+    // Bug report: the search box matched only the raw Korean drama_title, but
+    // the cards display the translated title in non-Korean languages -- so
+    // typing the exact name shown on screen ("Crash Landing on You") found
+    // nothing, because the underlying data is still "사랑의 불시착".
+    const user = userEvent.setup()
+    window.localStorage.setItem('ktourai_lang', 'en')
+    setup()
+
+    expect(screen.getByRole('button', { name: 'Crash Landing on You' })).toBeInTheDocument()
+
+    await user.type(screen.getByPlaceholderText('Search by title or alias'), 'Crash Landing')
+
+    expect(screen.getByRole('button', { name: 'Crash Landing on You' })).toBeInTheDocument()
+  })
+
   it('calls onClose when the close button is clicked', async () => {
     const user = userEvent.setup()
     const { onClose } = setup()
