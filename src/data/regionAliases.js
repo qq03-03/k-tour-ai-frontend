@@ -12,9 +12,9 @@
 // listed here so it gets hard-filtered to itself, the same as a colloquial
 // grouping term.
 export const regionAliases = [
-  { terms: ['경상도', '경상권'], regions: ['부산광역시', '대구광역시', '울산광역시', '경상북도', '경상남도'] },
-  { terms: ['전라도', '호남'], regions: ['광주광역시', '전북특별자치도', '전라남도'] },
-  { terms: ['충청도', '충청권'], regions: ['대전광역시', '세종특별자치시', '충청북도', '충청남도'] },
+  { terms: ['경상도', '경상권', '경상'], regions: ['부산광역시', '대구광역시', '울산광역시', '경상북도', '경상남도'] },
+  { terms: ['전라도', '호남', '전라'], regions: ['광주광역시', '전북특별자치도', '전라남도'] },
+  { terms: ['충청도', '충청권', '충청'], regions: ['대전광역시', '세종특별자치시', '충청북도', '충청남도'] },
   { terms: ['수도권'], regions: ['서울특별시', '경기도', '인천광역시'] },
   { terms: ['서울특별시', '서울'], regions: ['서울특별시'] },
   { terms: ['경기도', '경기'], regions: ['경기도'] },

@@ -12,11 +12,19 @@ export function deriveRegionFilterFromQuery(query, aliases = regionAliases) {
   const normalized = query.trim()
   if (!normalized) return null
 
+  // Pick the longest matching term across all groups, not just the first
+  // group that matches -- a short colloquial form like "경상" is itself a
+  // substring of a specific region's own name ("경상북도"), so checking
+  // groups in list order would hard-filter a query for "경상북도" down to
+  // every Gyeongsang-do region instead of just itself.
+  let best = null
   for (const group of aliases) {
-    if (group.terms.some((term) => normalized.includes(term))) {
-      return group.regions
+    for (const term of group.terms) {
+      if (normalized.includes(term) && (!best || term.length > best.term.length)) {
+        best = { term, regions: group.regions }
+      }
     }
   }
 
-  return null
+  return best ? best.regions : null
 }

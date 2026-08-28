@@ -57,4 +57,20 @@ describe('deriveRegionFilterFromQuery', () => {
     expect(deriveRegionFilterFromQuery('서울 데이트 코스')).toEqual(['서울특별시'])
     expect(deriveRegionFilterFromQuery('부산 여행지')).toEqual(['부산광역시'])
   })
+
+  it('hard-filters the shortened colloquial form of a region grouping, not just its full form', () => {
+    // Bug report: searching "경상" or "전라" (the common 2-syllable short
+    // form, dropping 도/권) fell through to plain CLIP search and surfaced
+    // unrelated regions like Seoul and Gangwon-do, even though the full
+    // "경상도"/"전라도" form was already hard-filtered correctly.
+    expect(deriveRegionFilterFromQuery('경상')).toEqual([
+      '부산광역시', '대구광역시', '울산광역시', '경상북도', '경상남도',
+    ])
+    expect(deriveRegionFilterFromQuery('전라')).toEqual([
+      '광주광역시', '전북특별자치도', '전라남도',
+    ])
+    expect(deriveRegionFilterFromQuery('충청')).toEqual([
+      '대전광역시', '세종특별자치시', '충청북도', '충청남도',
+    ])
+  })
 })
