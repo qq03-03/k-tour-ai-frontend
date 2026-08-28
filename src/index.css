@@ -53,19 +53,6 @@ a {
   }
 }
 
-/* Search results: the active filter summary is a mobile-only convenience
-   (small screens have no room to keep the filter panel open, so a compact
-   summary above the results shows what's currently selected). */
-.mobile-active-filters {
-  display: block;
-}
-
-@media (min-width: 900px) {
-  .mobile-active-filters {
-    display: none;
-  }
-}
-
 /* The on-page "☰ 검색 조건" toggle button is mobile's way into the filter
    panel. Desktop reaches the same panel through the header's hamburger
    menu instead (see .desktop-only-menu-item below and Header.jsx), so the

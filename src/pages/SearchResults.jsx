@@ -201,16 +201,29 @@ export default function SearchResults() {
     setIsFilterPanelOpen(false)
   }
 
-  const activeFilterSummary = [
-    ...selectedSeasons.map((id) => seasons.find((s) => s.id === id)?.label[lang] || id),
-    ...selectedThemeIds.map((id) => themes.find((t2) => t2.id === id)?.label[lang] || id),
-    ...selectedGenres.map((id) => {
-      const genre = genres.find((g) => g.id === id)
-      return genre ? t(genre.labelKey) : id
-    }),
-    ...selectedRegions.map((id) => regions.find((r) => r.id === id)?.label[lang] || id),
-    ...selectedDramas.map((title) => localizeDramaTitle(title, lang)),
-  ].join(' · ')
+  // Shows what got the user to this page, above the results -- combined
+  // filter panel selections, or a single season/theme/drama click from the
+  // home page, whichever applies. Skipped when the drama trailer panel is
+  // showing, since its own heading already names the drama.
+  const browsingSummaryParts = hasCombinedFilters
+    ? [
+        ...selectedSeasons.map((id) => seasons.find((s) => s.id === id)?.label[lang] || id),
+        ...selectedThemeIds.map((id) => themes.find((t2) => t2.id === id)?.label[lang] || id),
+        ...selectedGenres.map((id) => {
+          const genre = genres.find((g) => g.id === id)
+          return genre ? t(genre.labelKey) : id
+        }),
+        ...selectedRegions.map((id) => regions.find((r) => r.id === id)?.label[lang] || id),
+        ...selectedDramas.map((title) => localizeDramaTitle(title, lang)),
+      ]
+    : isDramaBrowsing
+      ? [localizeDramaTitle(dramaTitle, lang)]
+      : [
+          ...(theme ? [theme.label[lang]] : rawThemeId ? [rawThemeId] : []),
+          ...(season ? [seasons.find((s) => s.id === season)?.label[lang] || season] : []),
+        ]
+  const browsingSummary = browsingSummaryParts.join(' · ')
+  const showBrowsingSummary = (isBrowsing || isDramaBrowsing) && !(isDramaBrowsing && trailer)
 
   const resultsListContent = isLoading ? (
     <p style={{ textAlign: 'center', color: '#94a3b8' }}>{t('search_loading_message')}</p>
@@ -249,9 +262,9 @@ export default function SearchResults() {
           />
         </div>
       )}
-      {hasCombinedFilters && (
-        <div className="mobile-active-filters" style={{ padding: '0 24px 8px', fontSize: 12, color: '#64748b' }}>
-          {activeFilterSummary}
+      {showBrowsingSummary && (
+        <div style={{ padding: '0 24px 8px', fontSize: 12, color: '#64748b' }}>
+          {browsingSummary}
         </div>
       )}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 24px' }}>

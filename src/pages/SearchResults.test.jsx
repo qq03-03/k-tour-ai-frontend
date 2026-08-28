@@ -507,4 +507,48 @@ describe('SearchResults', () => {
       expect(await screen.findByText(/서울특별시/)).toBeInTheDocument()
     })
   })
+
+  describe('browsing summary indicator', () => {
+    // Regression coverage: landing on a filtered results page gave no clue
+    // what was clicked to get there, especially when it came back empty
+    // (e.g. browsing a drama with no matching locations) -- the empty state
+    // just says "no results" with nothing to say why you're looking at it.
+    // Unlike the combined filter panel's summary (desktop can reopen that
+    // panel to see its state), single-click season/theme/drama entries from
+    // the home page have no other indicator at all, on any screen size.
+
+    it('shows the season name above the results when browsing by season alone', async () => {
+      vi.mocked(searchSegmentsApi).mockResolvedValueOnce([])
+
+      renderAt('/search?season=summer')
+
+      expect(await screen.findByText('여름')).toBeInTheDocument()
+    })
+
+    it('shows the theme name above the results when browsing by theme alone', async () => {
+      vi.mocked(searchSegmentsApi).mockResolvedValueOnce([])
+
+      renderAt('/search?theme=night_view')
+
+      expect(await screen.findByText('야경')).toBeInTheDocument()
+    })
+
+    it('shows the drama name above the results when browsing a drama with no trailer and no results', async () => {
+      vi.mocked(listSegmentsByDramaApi).mockResolvedValueOnce([])
+
+      renderAt(`/search?drama=${encodeURIComponent('옥씨부인전')}`)
+
+      expect(await screen.findByText('옥씨부인전')).toBeInTheDocument()
+      expect(screen.getByText(/검색 결과가 없어요/)).toBeInTheDocument()
+    })
+
+    it('does not duplicate the drama name when a trailer panel already shows it as a heading', async () => {
+      vi.mocked(listSegmentsByDramaApi).mockResolvedValueOnce([makeSegment({ drama_title: '호텔 델루나' })])
+
+      renderAt(`/search?drama=${encodeURIComponent('호텔 델루나')}`)
+
+      await screen.findByText('테스트 장소')
+      expect(screen.getAllByText('호텔 델루나')).toHaveLength(1)
+    })
+  })
 })
