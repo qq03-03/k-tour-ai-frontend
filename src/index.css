@@ -92,3 +92,28 @@ a {
     display: block;
   }
 }
+
+/* Drama browsing's trailer panel: on mobile there's no room for the
+   trailer info and the location list side by side, so they stack in a
+   single column (trailer first, matching DOM order, then the list) --
+   two columns only from 900px up. */
+.trailer-panel-row {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.trailer-panel-row__info {
+  flex: 1;
+}
+
+@media (min-width: 900px) {
+  .trailer-panel-row {
+    flex-direction: row;
+    gap: 24px;
+  }
+
+  .trailer-panel-row__info {
+    flex: 0 0 280px;
+  }
+}

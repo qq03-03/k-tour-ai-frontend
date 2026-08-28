@@ -263,8 +263,8 @@ export default function SearchResults() {
         </div>
       )}
       {trailer ? (
-        <div style={{ padding: '14px 24px 24px', display: 'flex', gap: 24 }}>
-          <div style={{ flex: '0 0 280px' }}>
+        <div className="trailer-panel-row" style={{ padding: '14px 24px 24px' }}>
+          <div className="trailer-panel-row__info">
             <h2 style={{ fontSize: 26, fontWeight: 800, margin: '0 0 12px' }}>{dramaTitle}</h2>
             <a href={trailer.watchUrl} target="_blank" rel="noreferrer">
               <img
