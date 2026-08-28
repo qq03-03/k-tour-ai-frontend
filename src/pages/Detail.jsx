@@ -103,7 +103,9 @@ export default function Detail() {
         </div>
         <div className="detail-media-row__map" style={{ background: '#fff', borderRadius: 16, padding: 16, boxShadow: '0 4px 14px rgba(15,23,42,.05)' }}>
           <h4 style={{ margin: '0 0 10px', fontSize: 13 }}>📍 {t('detail_location_heading')}</h4>
-          <KakaoMap markers={getMapMarkers([segment], placeCoordinates)} />
+          <div className="detail-media-row__map-canvas">
+            <KakaoMap markers={getMapMarkers([segment], placeCoordinates)} fillHeight />
+          </div>
         </div>
       </div>
       <Footer />

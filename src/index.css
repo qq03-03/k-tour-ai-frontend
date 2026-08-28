@@ -36,10 +36,17 @@ a {
 }
 
 .detail-media-row__image {
-  height: 260px;
+  aspect-ratio: 1 / 1;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 4px 14px rgba(15, 23, 42, .05);
+}
+
+/* The map canvas itself (below the card's heading) squares off to match
+   the photo beside it -- KakaoMap's fillHeight prop makes it fill this
+   instead of using its own fixed pixel height. */
+.detail-media-row__map-canvas {
+  aspect-ratio: 1 / 1;
 }
 
 @media (min-width: 900px) {

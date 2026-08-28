@@ -57,6 +57,20 @@ describe('KakaoMap', () => {
     expect(screen.getByText(/지도를 불러오는 중/)).toBeInTheDocument()
   })
 
+  it('fills its container height instead of using a fixed pixel height when fillHeight is set', async () => {
+    // Detail.jsx wraps the map in a square (aspect-ratio) container so the
+    // map matches the photo next to it -- a hardcoded 260px height would
+    // ignore that container's actual size instead of filling it.
+    window.kakao = createKakaoMock()
+    const { container } = renderWithLanguage(<KakaoMap markers={oneMarker} fillHeight />)
+    const loadingBox = screen.getByText(/지도를 불러오는 중/).closest('div')
+    expect(loadingBox.style.height).toBe('100%')
+    expect([...container.querySelectorAll('div')].some((d) => d.style.height === '260px')).toBe(false)
+
+    await flushPromises()
+    expect([...container.querySelectorAll('div')].some((d) => d.style.height === '260px')).toBe(false)
+  })
+
   it('renders a map once the SDK loads', async () => {
     window.kakao = createKakaoMock()
     renderWithLanguage(<KakaoMap markers={oneMarker} />)

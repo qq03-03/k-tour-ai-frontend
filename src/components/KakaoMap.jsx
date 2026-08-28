@@ -41,7 +41,9 @@ function buildInfoWindowContent(marker) {
   return `<div style="padding:8px 12px;font-size:12px;font-weight:700;color:#1e293b;white-space:nowrap;">${marker.label}${dramaLine}</div>`
 }
 
-export default function KakaoMap({ markers, timeoutMs = DEFAULT_TIMEOUT_MS }) {
+export default function KakaoMap({ markers, timeoutMs = DEFAULT_TIMEOUT_MS, fillHeight = false }) {
+  const mapHeight = fillHeight ? '100%' : 260
+  const placeholderHeight = fillHeight ? '100%' : 200
   const containerRef = useRef(null)
   const [status, setStatus] = useState('loading')
   const [retryCount, setRetryCount] = useState(0)
@@ -128,7 +130,7 @@ export default function KakaoMap({ markers, timeoutMs = DEFAULT_TIMEOUT_MS }) {
 
   if (markers.length === 0) {
     return (
-      <div style={{ height: 200, borderRadius: 16, background: '#eef2f7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: 13 }}>
+      <div style={{ height: placeholderHeight, borderRadius: 16, background: '#eef2f7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: 13 }}>
         🗺️ {t('map_empty')}
       </div>
     )
@@ -136,7 +138,7 @@ export default function KakaoMap({ markers, timeoutMs = DEFAULT_TIMEOUT_MS }) {
 
   if (status === 'error') {
     return (
-      <div style={{ height: 200, borderRadius: 16, background: '#eef2f7', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, color: '#94a3b8', fontSize: 13 }}>
+      <div style={{ height: placeholderHeight, borderRadius: 16, background: '#eef2f7', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, color: '#94a3b8', fontSize: 13 }}>
         <span>🗺️ {t('map_error')}</span>
         <button
           onClick={() => setRetryCount((n) => n + 1)}
@@ -149,15 +151,15 @@ export default function KakaoMap({ markers, timeoutMs = DEFAULT_TIMEOUT_MS }) {
   }
 
   return (
-    <div style={{ position: 'relative' }}>
+    <div style={{ position: 'relative', height: fillHeight ? '100%' : undefined }}>
       {status === 'loading' && (
-        <div style={{ height: 260, borderRadius: 16, background: '#eef2f7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: 13 }}>
+        <div style={{ height: mapHeight, borderRadius: 16, background: '#eef2f7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: 13 }}>
           {t('map_loading')}
         </div>
       )}
       <div
         ref={containerRef}
-        style={{ width: '100%', height: 260, borderRadius: 16, overflow: 'hidden', display: status === 'ready' ? 'block' : 'none' }}
+        style={{ width: '100%', height: mapHeight, borderRadius: 16, overflow: 'hidden', display: status === 'ready' ? 'block' : 'none' }}
       />
     </div>
   )
