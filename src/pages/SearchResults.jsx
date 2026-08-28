@@ -18,6 +18,7 @@ import { getMapMarkers } from '../lib/getMapMarkers.js'
 import { localizeSegment } from '../lib/localizeSegment.js'
 import { getDramaTrailer } from '../lib/getDramaTrailer.js'
 import { getDramaTitlesByGenre } from '../lib/getDramaTitlesByGenre.js'
+import { localizeDramaTitle } from '../lib/localizeDramaTitle.js'
 import { genres } from '../data/dramaGenres.js'
 import SearchFilterPanel from '../components/SearchFilterPanel.jsx'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
@@ -202,7 +203,7 @@ export default function SearchResults() {
       const genre = genres.find((g) => g.id === id)
       return genre ? t(genre.labelKey) : id
     }),
-    ...selectedDramas,
+    ...selectedDramas.map((title) => localizeDramaTitle(title, lang)),
   ].join(' · ')
 
   const resultsListContent = isLoading ? (
@@ -265,11 +266,11 @@ export default function SearchResults() {
       {trailer ? (
         <div className="trailer-panel-row" style={{ padding: '14px 24px 24px' }}>
           <div className="trailer-panel-row__info">
-            <h2 style={{ fontSize: 26, fontWeight: 800, margin: '0 0 12px' }}>{dramaTitle}</h2>
+            <h2 style={{ fontSize: 26, fontWeight: 800, margin: '0 0 12px' }}>{localizeDramaTitle(dramaTitle, lang)}</h2>
             <a href={trailer.watchUrl} target="_blank" rel="noreferrer">
               <img
                 src={trailer.thumbnailUrl}
-                alt={`${dramaTitle} 예고편 보기`}
+                alt={`${localizeDramaTitle(dramaTitle, lang)} 예고편 보기`}
                 style={{ width: '100%', borderRadius: 12, display: 'block' }}
               />
             </a>

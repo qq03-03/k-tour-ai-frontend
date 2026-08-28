@@ -5,6 +5,7 @@ import { genres } from '../data/dramaGenres.js'
 import { mockSegments } from '../data/mockSegments.js'
 import { getFeaturedDramas } from '../lib/getFeaturedDramas.js'
 import { deriveDramaImagePath } from '../lib/deriveDramaImagePath.js'
+import { localizeDramaTitle } from '../lib/localizeDramaTitle.js'
 import { useLanguage } from '../i18n/LanguageContext.jsx'
 
 // Same one-card-per-drama_title source DramaSection.jsx uses on the home
@@ -141,7 +142,9 @@ export default function SearchFilterPanel({ seasons: selectedSeasons, themeIds, 
                   onError={(event) => { event.currentTarget.style.visibility = 'hidden' }}
                   style={{ width: '100%', height: 60, objectFit: 'cover', borderRadius: 12, background: '#e2e8f0', display: 'block' }}
                 />
-                <p style={{ fontSize: 11, margin: '6px 0 0', fontWeight: 600, color: 'var(--color-text)' }}>{drama.drama_title}</p>
+                <p style={{ fontSize: 11, margin: '6px 0 0', fontWeight: 600, color: 'var(--color-text)' }}>
+                  {localizeDramaTitle(drama.drama_title, lang)}
+                </p>
               </button>
             )
           })}
