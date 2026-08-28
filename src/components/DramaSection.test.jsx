@@ -40,6 +40,22 @@ describe('DramaSection', () => {
     expect(hotelDelLuna.getAttribute('href')).toBe(`/search?drama=${encodeURIComponent('호텔 델루나')}`)
   })
 
+  it('links to the Korean drama_title even when the display language is English (the backend only matches the Korean value)', () => {
+    // Regression test: the link used to build its href from the already-
+    // localized segment (localizeSegment swaps drama_title to the English
+    // title), so in English every drama card linked to a title the backend
+    // couldn't match at all -- clicking any card in en/ja/zh returned zero
+    // results. The visible card text should still be translated; only the
+    // link target must stay Korean.
+    window.localStorage.setItem('ktourai_lang', 'en')
+    renderWithLanguage(<MemoryRouter><DramaSection /></MemoryRouter>)
+
+    expect(screen.getByText('Crash Landing on You')).toBeInTheDocument()
+    const links = screen.getAllByRole('link')
+    const crashLanding = links.find((link) => link.textContent === 'Crash Landing on You')
+    expect(crashLanding.getAttribute('href')).toBe(`/search?drama=${encodeURIComponent('사랑의 불시착')}`)
+  })
+
   it('hides an image without crashing when the image fails to load', () => {
     renderWithLanguage(<MemoryRouter><DramaSection /></MemoryRouter>)
     const [firstImage] = screen.getAllByRole('img')
