@@ -23,6 +23,27 @@ function setup(props = {}) {
 }
 
 describe('SearchFilterPanel', () => {
+  it('shows a live summary of the currently selected filters next to the panel title', () => {
+    setup({ seasons: ['summer'], regions: ['서울특별시'] })
+    expect(screen.getByText('여름 · 서울특별시')).toBeInTheDocument()
+  })
+
+  it('updates the summary immediately when a pill is toggled, before Apply is clicked', async () => {
+    const user = userEvent.setup()
+    setup({ seasons: ['summer'] })
+
+    expect(screen.getByTestId('filter-selection-summary')).toHaveTextContent('여름')
+
+    await user.click(screen.getByRole('button', { name: '공포' }))
+
+    expect(screen.getByText('여름 · 공포')).toBeInTheDocument()
+  })
+
+  it('shows nothing for the summary when no filters are selected', () => {
+    setup()
+    expect(screen.queryByTestId('filter-selection-summary')).not.toBeInTheDocument()
+  })
+
   it('renders season, theme, genre, region, and drama sections as home-screen-style pill/card buttons', () => {
     setup()
     expect(screen.getByText('계절')).toBeInTheDocument()

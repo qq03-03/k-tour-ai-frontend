@@ -55,6 +55,21 @@ export default function SearchFilterPanel({ seasons: selectedSeasons, themeIds, 
   // non-Korean user typing exactly what they see on screen must find it.
   const visibleDramas = allDramas.filter((drama) => localizeDramaTitle(drama.drama_title, lang).includes(dramaSearch))
 
+  // Live preview of the draft selection, shown next to the panel title so
+  // the user can see what they've picked so far without having to scroll
+  // back up through every section -- updates as pills are toggled, before
+  // Apply is clicked.
+  const selectionSummary = [
+    ...draftSeasons.map((id) => seasons.find((s) => s.id === id)?.label[lang] || id),
+    ...draftThemeIds.map((id) => themes.find((t2) => t2.id === id)?.label[lang] || id),
+    ...draftGenres.map((id) => {
+      const genre = genres.find((g) => g.id === id)
+      return genre ? t(genre.labelKey) : id
+    }),
+    ...draftRegions.map((id) => regions.find((r) => r.id === id)?.label[lang] || id),
+    ...draftDramas.map((title) => localizeDramaTitle(title, lang)),
+  ].join(' · ')
+
   function handleApply() {
     onApply({ seasons: draftSeasons, themeIds: draftThemeIds, genres: draftGenres, regions: draftRegions, dramas: draftDramas })
   }
@@ -70,12 +85,23 @@ export default function SearchFilterPanel({ seasons: selectedSeasons, themeIds, 
 
   return (
     <div style={{ background: 'white', borderRadius: 16, padding: '20px', boxShadow: '0 8px 24px rgba(15,23,42,.12)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 800, margin: 0 }}>{t('filter_panel_title')}</h3>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 14, cursor: 'pointer' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: selectionSummary ? 4 : 12 }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, minWidth: 0 }}>
+          <h3 style={{ fontSize: 16, fontWeight: 800, margin: 0, flexShrink: 0 }}>{t('filter_panel_title')}</h3>
+          {selectionSummary && (
+            <span
+              data-testid="filter-selection-summary"
+              style={{ fontSize: 12, color: 'var(--color-primary)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+            >
+              {selectionSummary}
+            </span>
+          )}
+        </div>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 14, cursor: 'pointer', flexShrink: 0 }}>
           {t('filter_close')}
         </button>
       </div>
+      {selectionSummary && <div style={{ height: 1, background: '#e2e8f0', margin: '0 0 12px' }} />}
 
       <section style={{ marginBottom: 16 }}>
         <h4 style={{ fontSize: 13, margin: '0 0 8px' }}>{t('filter_season')}</h4>
